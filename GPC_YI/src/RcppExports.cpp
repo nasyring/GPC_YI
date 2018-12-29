@@ -10,8 +10,8 @@ using namespace std;
 
 
 // GPC_yi_parallel
-Rcpp::List GPC_yi_parallel(SEXP & nn, SEXP & data, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp);
-RcppExport SEXP GPC_GPC_yi_parallel(SEXP nnSEXP, SEXP dataSEXP, SEXP theta_bootSEXP, SEXP data_bootSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP){
+Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp);
+RcppExport SEXP GPCYI_GPCYI_yi_parallel(SEXP nnSEXP, SEXP dataSEXP, SEXP theta_bootSEXP, SEXP data_bootSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP){
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -22,7 +22,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP & >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type M_samp(M_sampSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type B_resamp(B_resampSEXP);
-    __result = Rcpp::wrap(GPC_yi_parallel(nn, data, theta_boot, data_boot, alpha, M_samp, B_resamp));
+    __result = Rcpp::wrap(GPCYI_yi_parallel(nn, data, theta_boot, data_boot, alpha, M_samp, B_resamp));
     return __result;
 END_RCPP
 }
@@ -35,7 +35,7 @@ END_RCPP
 NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericMatrix thetaboot, NumericVector bootmean0,
 	NumericVector bootmean1, NumericMatrix databoot, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
 	NumericVector w);
-RcppExport SEXP GPC_rcpp_parallel_yi(SEXP nnSEXP, SEXP dataSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP databootSEXP,
+RcppExport SEXP GPCYI_rcpp_parallel_yi(SEXP nnSEXP, SEXP dataSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP databootSEXP,
                                     SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP, SEXP wSEXP){
 BEGIN_RCPP
     Rcpp::RObject __result;
@@ -59,7 +59,7 @@ END_RCPP
 
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetaboot,
 	NumericVector bootmean0, NumericVector bootmean1, NumericVector alpha, NumericVector M_samp, NumericVector w);
-RcppExport SEXP GPC_GibbsMCMC2(SEXP nnSEXP, SEXP dataSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP wSEXP){
+RcppExport SEXP GPCYI_GibbsMCMC2(SEXP nnSEXP, SEXP dataSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP wSEXP){
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -80,13 +80,13 @@ END_RCPP
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"GPC_GPC_yi_parallel", (DL_FUNC) &GPC_GPC_yi_parallel, 7},
-    {"GPC_rcpp_parallel_yi", (DL_FUNC) &GPC_rcpp_parallel_yi, 10},
-    {"GPC_GibbsMCMC2", (DL_FUNC) &GPC_GibbsMCMC2, 8},
+    {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 7},
+    {"GPCYI_rcpp_parallel_yi", (DL_FUNC) &GPCYI_rcpp_parallel_yi, 10},
+    {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 8},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_GPC(DllInfo *dll) {
+RcppExport void R_init_GPCYI(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

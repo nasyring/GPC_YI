@@ -1,5 +1,5 @@
-\name{GPC_yi_parallel}
-\alias{GPC_yi_parallel}
+\name{GPCYI_yi_parallel}
+\alias{GPCYI_yi_parallel}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 GPC for youden index
@@ -8,7 +8,7 @@ GPC for youden index
 scale the posterior for youden index
 }
 \usage{
-GPC_yi_parallel(nn, data, theta_boot, data_boot, alpha, M_samp, B_resamp)
+GPCYI_yi_parallel(nn, data, theta_boot, data_boot, alpha, M_samp, B_resamp)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

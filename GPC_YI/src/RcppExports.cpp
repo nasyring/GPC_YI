@@ -80,8 +80,8 @@ END_RCPP
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"GPC_GPC_yi_parallel", (DL_FUNC) &GPC_GPC_qr_parallel, 7},
-    {"GPC_rcpp_parallel_yi", (DL_FUNC) &GPC_rcpp_parallel_qr, 10},
+    {"GPC_GPC_yi_parallel", (DL_FUNC) &GPC_GPC_yi_parallel, 7},
+    {"GPC_rcpp_parallel_yi", (DL_FUNC) &GPC_rcpp_parallel_yi, 10},
     {"GPC_GibbsMCMC2", (DL_FUNC) &GPC_GibbsMCMC2, 8},
     {NULL, NULL, 0}
 };

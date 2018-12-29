@@ -1,9 +1,9 @@
 # GPC algorithm
 
 
-GPC R Codes includes an R script to implement the quantile regression example in https://arxiv.org/abs/1509.00922.
+GPC R Codes includes an R script to implement the youden index examples in ...
 
-Additionally, the GPC folder contains files needed to install an GPC package with Rcpp codes for all three examples done in the above paper.
+Additionally, the GPC_YI folder contains files needed to install an GPC_YI package with Rcpp codes for all  examples done in the above paper.
 
 To install the GPC_YI package you will need:
   1.  R, version 3.3.4 was used to build GPC_YI.

@@ -16,92 +16,13 @@ using namespace std;
 #include <cmath>
 #include <algorithm>
 
-// generic function for kl_divergence
-template <typename InputIterator1, typename InputIterator2>
-inline double kl_divergence(InputIterator1 begin1, InputIterator1 end1, 
-                            InputIterator2 begin2) {
-  
-   // value to return
-   double rval = 0;
-   
-   // set iterators to beginning of ranges
-   InputIterator1 it1 = begin1;
-   InputIterator2 it2 = begin2;
-   
-   // for each input item
-   while (it1 != end1) {
-      
-      // take the value and increment the iterator
-      double d1 = *it1++;
-      double d2 = *it2++;
-      
-      // accumulate if appropirate
-      if (d1 > 0 && d2 > 0)
-         rval += std::log(d1 / d2) * d1;
-   }
-   return rval;  
-}
+
 
 // helper function for taking the average of two numbers
 inline double average(double val1, double val2) {
    return (val1 + val2) / 2;
 }
 
-struct JsDistance : public Worker {
-   
-   // input matrix to read from
-   const RMatrix<double> mat;
-   
-   // output matrix to write to
-   RMatrix<double> rmat;
-   
-   // initialize from Rcpp input and output matrixes (the RMatrix class
-   // can be automatically converted to from the Rcpp matrix type)
-   JsDistance(const NumericMatrix mat, NumericMatrix rmat)
-      : mat(mat), rmat(rmat) {}
-   
-   // function call operator that work for the specified range (begin/end)
-   void operator()(std::size_t begin, std::size_t end) {
-      for (std::size_t i = begin; i < end; i++) {
-         for (std::size_t j = 0; j < i; j++) {
-            
-            // rows we will operate on
-            RMatrix<double>::Row row1 = mat.row(i);
-            RMatrix<double>::Row row2 = mat.row(j);
-            
-            // compute the average using std::tranform from the STL
-            std::vector<double> avg(row1.length());
-            std::transform(row1.begin(), row1.end(), // input range 1
-                           row2.begin(),             // input range 2
-                           avg.begin(),              // output range 
-                           average);                 // function to apply
-              
-            // calculate divergences
-            double d1 = kl_divergence(row1.begin(), row1.end(), avg.begin());
-            double d2 = kl_divergence(row2.begin(), row2.end(), avg.begin());
-               
-            // write to output matrix
-            rmat(i,j) = sqrt(.5 * (d1 + d2));
-         }
-      }
-   }
-};
-
-
-// [[Rcpp::export]]
-NumericMatrix rcpp_parallel_js_distance(NumericMatrix mat) {
-  
-   // allocate the matrix we will return
-   NumericMatrix rmat(mat.nrow(), mat.nrow());
-
-   // create the worker
-   JsDistance jsDistance(mat, rmat);
-     
-   // call it with parallelFor
-   parallelFor(0, mat.nrow(), jsDistance);
-
-   return rmat;
-}
 
 // helper function for Gibbs sampling
 
@@ -131,20 +52,72 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector u1(1,0.0);
 	theta0old = thetaboot(i,0);
 	theta1old = thetaboot(i,1);
+	NumericVector n0(1,0.0);
+	NumericVector n1(1,0.0);
+	NumericVector n2(1,0.0);
+	NumericVector F0_c0old(1,0.0);
+	NumericVector F0_c0new(1,0.0);
+	NumericVector F1_c0old(1,0.0);
+	NumericVector F1_c0new(1,0.0);
+	NumericVector F1_c1old(1,0.0);
+	NumericVector F1_c1new(1,0.0);
+	NumericVector F2_c1old(1,0.0);
+	NumericVector F2_c1new(1,0.0);
+	theta0old = bootmean0;
+	theta1old = bootmean1;
+	for(int k=0; k<n; k++){
+		if(databoot(k,2*i)==1){
+			n0(0) = n0(0) + 1;
+			if(databoot(k,2*i+1)<=theta0old(0)){
+				F0_c0old(0) = 	F0_c0old(0)+1;
+			}	
+		}
+		else if(databoot(k,2*i)==2){
+			n1(0) = n1(0) + 1;
+			if(databoot(k,2*i+1)<=theta0old(0)){
+				F1_c0old(0) = 	F1_c0old(0)+1;
+			}
+			if(databoot(k,2*i+1)<=theta1old(0)){
+				F1_c1old(0) = 	F1_c1old(0)+1;
+			}	
+		}
+		else {
+			n2(0) = n2(0) + 1;
+			if(databoot(k,2*i+1)<=theta1old(0)){
+				F2_c1old(0) = 	F2_c1old(0)+1;
+			}
+		}
+	}
+	F0_c0old(0) = 	F0_c0old(0)/n0(0);
+	F1_c0old(0) = 	F1_c0old(0)/n1(0);
+	F1_c1old(0) = 	F1_c1old(0)/n1(0);
+	F2_c1old(0) = 	F2_c1old(0)/n2(0);
 	
 	for(int j=0; j<(M+100); j++) {
 		theta0new(0) = R::rnorm(theta0old(0), 0.5);
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
-			loglikdiff(0) = loglikdiff(0) -w[0] * fabs(databoot(k,2*i+1)-theta0new(0) - theta1old(0)*databoot(k,2*i)) + w[0] * fabs(databoot(k,2*i+1)-theta0old(0) - theta1old(0)*databoot(k,2*i)); 
+			if(databoot(k,2*i)==1){
+				if(databoot(k,2*i+1)<=theta0new(0)){
+					F0_c0new(0) = 	F0_c0new(0)+1;
+				}	
+			}
+			else if(databoot(k,2*i)==2){
+				if(databoot(k,2*i+1)<=theta0new(0)){
+					F1_c0new(0) = 	F1_c0new(0)+1;
+				}
+			}
 		}
-		r[0] = R::dnorm(theta0new(0), theta0old(0),.5, 0)/R::dnorm(theta0old(0),theta0new(0),.5, 0);
-		loglikdiff(0) = loglikdiff(0) + log(r(0));
+		F0_c0new(0) = 	F0_c0new(0)/n0(0);
+		F1_c0new(0) = 	F1_c0new(0)/n1(0);
+		loglikdiff(0) = w[0]*(F0_c0new(0)-F0_c0old(0)-F1_c0new(0)+F1_c0old(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
       		if((uu(0) <= loglikdiff(0)) && (j>99)) {
 			postsamples0(j-100) = theta0new(0);
-			theta0old(0) = theta0new(0); 
+			theta0old(0) = theta0new(0);
+			F0_c0old(0)=F0_c0new(0);
+			F1_c0old(0)=F1_c0new(0);
       		}
 		else if(j>99){
 			postsamples0(j-100) = theta0old(0);	
@@ -152,15 +125,27 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		theta1new[0] = R::rnorm(theta1old(0), 0.5);
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
-			loglikdiff(0) = loglikdiff(0) -w[0] * fabs(databoot(k,2*i+1)-theta0old(0) - theta1new(0)*databoot(k,2*i)) + w[0] * fabs(databoot(k,2*i+1)-theta0old(0) - theta1old(0)*databoot(k,2*i)); 
+			if(databoot(k,2*i)==2){
+				if(databoot(k,2*i+1)<=theta1new(0)){
+					F1_c1new(0) = 	F1_c1new(0)+1;
+				}	
+			}
+			else {
+				if(databoot(k,2*i+1)<=theta1new(0)){
+					F2_c1new(0) = 	F2_c1new(0)+1;
+				}
+			}
 		}
-		r[0] = R::dnorm(theta1new(0), theta1old(0),.5, 0) / R::dnorm(theta1old(0),theta1new(0),.5, 0);
-		loglikdiff(0) = loglikdiff(0) + log(r(0));
+		F1_c1new(0) = 	F1_c1new(0)/n1(0);
+		F2_c1new(0) = 	F2_c1new(0)/n2(0);
+		loglikdiff(0) = w[0]*(F1_c1new(0)-F1_c1old(0)-F2_c1new(0)+F2_c1old(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
       		if((uu(0) <= loglikdiff(0)) && (j>99)) {
 			postsamples1(j-100) = theta1new(0);
 			theta1old(0) = theta1new(0); 
+			F1_c1old(0)=F1_c1new(0);
+			F2_c1old(0)=F2_c1new(0);
       		}
 		else if(j>99){
 			postsamples1(j-100) = theta1old(0);	

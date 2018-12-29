@@ -5,12 +5,12 @@ GPC R Codes includes an R script to implement the quantile regression example in
 
 Additionally, the GPC folder contains files needed to install an GPC package with Rcpp codes for all three examples done in the above paper.
 
-To install the GPC package you will need:
-  1.  R, version 3.3.q was used to build GPC.
+To install the GPC_YI package you will need:
+  1.  R, version 3.3.4 was used to build GPC_YI.
   2.  Rtools.
   3.  The devtools package.
   
 Steps:
   1.  Open Rgui.
   2.  Install the "devtools" package if you have not already using the dropdown "Packages -> Install package(s)...".  Load the devtools      package using the command library(devtools).  
-  3.  Submit the command: install_github("nasyring/GPC", subdir = "GPC").
+  3.  Submit the command: install_github("nasyring/GPC_YI", subdir = "GPC_YI").

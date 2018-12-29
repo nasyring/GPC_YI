@@ -1,4 +1,4 @@
-useDynLib(GPC, .registration=TRUE)
+useDynLib(GPC_YI, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
 importFrom(RcppParallel, RcppParallelLibs)
 importFrom("utils", "read.table")

@@ -1,14 +1,14 @@
-\name{GPC_qr_parallel}
-\alias{GPC_qr_parallel}
+\name{GPC_yi_parallel}
+\alias{GPC_yi_parallel}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-GPC for quantile regression example 4.1.
+GPC for youden index
 }
 \description{
-scale the posterior for quantile reg
+scale the posterior for youden index
 }
 \usage{
-GPC_qr_parallel(nn, data, theta_boot, data_boot, alpha, M_samp, B_resamp)
+GPC_yi_parallel(nn, data, theta_boot, data_boot, alpha, M_samp, B_resamp)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

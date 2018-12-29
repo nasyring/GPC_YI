@@ -6,7 +6,7 @@ Date: 2016-10-12
 Author: Nicholas Syring
 Maintainer: Nicholas Syring <nasyrin@gmail.com>
 Description:  Provides tools for calibrating misspecified posterior credible intervals.  Functions are provided
-  for quantile and linear regression, and a normal mixture model.    
+  for modeling the Youden Index and cutoff.    
 License: GPL (>= 3) 
 Imports: Rcpp (>= 0.12.16), RcppParallel (>= 4.4.0)
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel

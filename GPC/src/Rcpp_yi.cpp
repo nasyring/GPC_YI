@@ -31,9 +31,6 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	RVector<double> alpha, RVector<double> M_samp, RVector<double> w, std::size_t i) {
    	
 
-	
-	
-	
 	double cov_ind;
 	int M = int(M_samp[0]);
 	int n = int(nn[0]);
@@ -297,7 +294,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	return result;
 }
 
-struct GPC_qr_mcmc_parallel : public Worker {
+struct GPC_yi_mcmc_parallel : public Worker {
 
 	const RVector<double> nn;
 	const RMatrix<double> data;
@@ -312,7 +309,7 @@ struct GPC_qr_mcmc_parallel : public Worker {
 	RVector<double> cover;
 
    // initialize with source and destination
-   GPC_qr_mcmc_parallel(const NumericVector nn,	const NumericMatrix data, const NumericMatrix thetaboot,
+   GPC_yi_mcmc_parallel(const NumericVector nn,	const NumericMatrix data, const NumericMatrix thetaboot,
 	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot,
 	const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp,
 	const NumericVector w, NumericVector cover) 
@@ -336,7 +333,7 @@ NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericMatr
    NumericVector cover(B,2.0); 
 
    // create the worker
-   GPC_qr_mcmc_parallel gpcWorker(nn, data, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w, cover);
+   GPC_yi_mcmc_parallel gpcWorker(nn, data, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w, cover);
      
    // call it with parallelFor
    
@@ -350,7 +347,7 @@ NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericMatr
 
 
 // [[Rcpp::export]]
-Rcpp::List GPC_qr_parallel(SEXP & nn, SEXP & data, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {
+Rcpp::List GPC_yi_parallel(SEXP & nn, SEXP & data, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {
 
 RNGScope scp;
 Rcpp::Function _GPC_rcpp_parallel_yi("rcpp_parallel_yi");

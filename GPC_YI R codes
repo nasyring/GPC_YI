@@ -1,0 +1,15 @@
+############################################
+## General Posterior Calibration for Youden Index
+## Nick Syring, nasyrin@gmail.com
+## 
+############################################
+
+
+#### Installing the package via Github
+library(devtools)
+install_github("nasyring/GPC_YI", subdir = "GPC_YI")
+library(GPC_YI)
+
+
+
+   

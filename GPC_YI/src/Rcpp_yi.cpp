@@ -246,8 +246,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
 	NumericVector u1(1,0.0);
-	theta0old(0) = bootmean0(0);
-	theta1old(0) = bootmean1(1);
+	theta0old = bootmean0;
+	theta1old = bootmean1;
 	NumericVector n0(1,0.0);
 	NumericVector n1(1,0.0);
 	NumericVector n2(1,0.0);
@@ -273,24 +273,24 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	
 	for(int k=0; k<n; k++){
 		if(data(k,0)==1){
-			n0(0) = n0(0) + 1;
+			n0(0) = n0(0) + 1.0;
 			if(data(k,1)<=theta0old(0)){
-				F0_c0old(0) = 	F0_c0old(0)+1;
+				F0_c0old(0) = 	F0_c0old(0)+1.0;
 			}	
 		}
 		else if(data(k,0)==2){
-			n1(0) = n1(0) + 1;
+			n1(0) = n1(0) + 1.0;
 			if(data(k,1)<=theta0old(0)){
-				F1_c0old(0) = 	F1_c0old(0)+1;
+				F1_c0old(0) = 	F1_c0old(0)+1.0;
 			}
 			if(data(k,1)<=theta1old(0)){
-				F1_c1old(0) = 	F1_c1old(0)+1;
+				F1_c1old(0) = 	F1_c1old(0)+1.0;
 			}	
 		}
 		else {
-			n2(0) = n2(0) + 1;
+			n2(0) = n2(0) + 1.0;
 			if(data(k,1)<=theta1old(0)){
-				F2_c1old(0) = 	F2_c1old(0)+1;
+				F2_c1old(0) = 	F2_c1old(0)+1.0;
 			}
 		}
 	}

@@ -70,6 +70,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector s2x(1,0.0);
 	NumericVector s2y(1,0.0);
 	NumericVector sxy(1,0.0);
+	NumericVector acc0(1,0.0);
 
 	
 	for(int k=0; k<n; k++){
@@ -104,7 +105,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		if(j<=16){
 			theta0new(0) = R::rnorm(theta0old(0), 1);
 			theta1new(0) = R::rnorm(theta1old(0), 1);
-		}else {
+		}
+		else {
 			vv[0] = R::runif(0.0,1.0);
 			if(vv[0]<=0.95){
 				theta0new(0) = R::rnorm(0.0, 1.0);
@@ -114,7 +116,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				sxy(0) = (2.38*2.38/2.0)*(sumsamp01(0)*(1/j) - (sumsamp0(0)*sumsamp1(0)*(1/j)*(1/j)));
 				theta0new(0) = theta0new(0)*sqrt(s2x(0))+theta0old(0);
 				theta1new(0) = theta1new(0)*sqrt(s2y(0)-pow(sxy(0),2.0)*(1/s2x(0))) + theta0new(0)*sxy(0)*(1/sqrt(s2x(0)))+theta1old(0);
-			}else {
+			}
+			else {
 				theta0new(0) = R::rnorm(theta0old(0), 0.05);
 				theta1new(0) = R::rnorm(theta1old(0), 0.05);					
 			}
@@ -152,6 +155,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 			theta0old(0) = theta0new(0);
 			F0_c0old(0)=F0_c0new(0);
 			F1_c0old(0)=F1_c0new(0);
+			acc0(0) = acc0(0)+1.0;
       		}
 		else if(j>99){
 			postsamples0(j-100) = theta0old(0);	
@@ -216,7 +220,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
 	
-	return cov_ind;
+	return acc0;
+
 	
 }
 

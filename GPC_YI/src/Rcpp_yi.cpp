@@ -101,9 +101,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	F2_c1old(0) = 	F2_c1old(0)/n2(0);
 	
 	for(int j=0; j<(M+100); j++) {
-		if(j<=4){
-			theta0new(0) = R::rnorm(theta0old(0), 0.005);
-			theta1new(0) = R::rnorm(theta1old(0), 0.005);
+		if(j<=16){
+			theta0new(0) = R::rnorm(theta0old(0), 1);
+			theta1new(0) = R::rnorm(theta1old(0), 1);
 		}else {
 			vv[0] = R::runif(0.0,1.0);
 			if(vv[0]<=0.95){
@@ -115,8 +115,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				theta0new(0) = theta0new(0)*sqrt(s2x(0))+theta0old(0);
 				theta1new(0) = theta1new(0)*sqrt(s2y(0)-pow(sxy(0),2.0)*(1/s2x(0))) + theta0new(0)*sxy(0)*(1/sqrt(s2x(0)))+theta1old(0);
 			}else {
-				theta0new(0) = R::rnorm(theta0old(0), 0.005);
-				theta1new(0) = R::rnorm(theta1old(0), 0.005);					
+				theta0new(0) = R::rnorm(theta0old(0), 0.05);
+				theta1new(0) = R::rnorm(theta1old(0), 0.05);					
 			}
 		}
 		loglikdiff(0) = 0.0;

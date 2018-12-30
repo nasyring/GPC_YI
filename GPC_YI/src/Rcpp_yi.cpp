@@ -103,13 +103,12 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	
 	for(int j=0; j<(M+100); j++) {
 		if(j<=16){
-			theta0new(0) = R::rnorm(theta0old(0), 1);
-			theta1new(0) = R::rnorm(theta1old(0), 1);
+			theta0new(0) = R::rnorm(theta0old(0), .1);
+			theta1new(0) = R::rnorm(theta1old(0), .1);
 		}
 		else {
 			vv[0] = R::runif(0.0,1.0);
 			if(vv[0]<=0.95){
-				acc0(0)=acc0(0)+1;
 				theta0new(0) = R::rnorm(0.0, 1.0);
 				theta1new(0) = R::rnorm(0.0, 1.0);
 				s2x(0) = (2.38*2.38/2.0)*(sumsamp0sq(0)*(1/j) - pow((sumsamp0(0)*(1/j)),2.0));
@@ -221,7 +220,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
 	
-	return acc0(0);
+	return cov_ind;
 
 	
 }

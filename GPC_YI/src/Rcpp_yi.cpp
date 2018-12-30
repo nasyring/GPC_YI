@@ -220,7 +220,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
 	
-	return acc0;
+	return acc0(0);
 
 	
 }

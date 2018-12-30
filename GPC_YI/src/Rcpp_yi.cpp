@@ -415,7 +415,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	l1[0] = postsamples1(0.025*M);
 	u1[0] = postsamples1(0.975*M);
 	
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0[0],Rcpp::Named("u0") = u0[0],Rcpp::Named("l1") = l1[0],Rcpp::Named("u1") = u1[0]);
+	//result = Rcpp::List::create(Rcpp::Named("l0") = l0[0],Rcpp::Named("u0") = u0[0],Rcpp::Named("l1") = l1[0],Rcpp::Named("u1") = u1[0]);
+	result = Rcpp::List::create(Rcpp::Named("sumsamp0") = sumsamp0,Rcpp::Named("sumsamp1") = sumsamp1,Rcpp::Named("sumsamp0sq") = sumsamp0sq,Rcpp::Named("sumsamp1sq") = sumsamp1sq,Rcpp::Named("sumsamp01") = sumsamp01);
 
 	return result;
 }

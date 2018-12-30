@@ -272,24 +272,24 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	
 	
 	for(int k=0; k<n; k++){
-		if(databoot(k,2*i)==1){
+		if(data(k,2)==1){
 			n0(0) = n0(0) + 1;
-			if(databoot(k,2*i+1)<=theta0old(0)){
+			if(data(k,1)<=theta0old(0)){
 				F0_c0old(0) = 	F0_c0old(0)+1;
 			}	
 		}
-		else if(databoot(k,2*i)==2){
+		else if(data(k,2)==2){
 			n1(0) = n1(0) + 1;
-			if(databoot(k,2*i+1)<=theta0old(0)){
+			if(data(k,1)<=theta0old(0)){
 				F1_c0old(0) = 	F1_c0old(0)+1;
 			}
-			if(databoot(k,2*i+1)<=theta1old(0)){
+			if(data(k,1)<=theta1old(0)){
 				F1_c1old(0) = 	F1_c1old(0)+1;
 			}	
 		}
 		else {
 			n2(0) = n2(0) + 1;
-			if(databoot(k,2*i+1)<=theta1old(0)){
+			if(data(k,1)<=theta1old(0)){
 				F2_c1old(0) = 	F2_c1old(0)+1;
 			}
 		}
@@ -322,13 +322,13 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		}
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
-			if(databoot(k,2*i)==1){
-				if(databoot(k,2*i+1)<=theta0new(0)){
+			if(data(k,2)==1){
+				if(data(k,1)<=theta0new(0)){
 					F0_c0new(0) = 	F0_c0new(0)+1;
 				}	
 			}
-			else if(databoot(k,2*i)==2){
-				if(databoot(k,2*i+1)<=theta0new(0)){
+			else if(data(k,2)==2){
+				if(data(k,1)<=theta0new(0)){
 					F1_c0new(0) = 	F1_c0new(0)+1;
 				}
 			}
@@ -360,13 +360,13 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		}
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
-			if(databoot(k,2*i)==2){
-				if(databoot(k,2*i+1)<=theta1new(0)){
+			if(data(k,2)==2){
+				if(data(k,1)<=theta1new(0)){
 					F1_c1new(0) = 	F1_c1new(0)+1;
 				}	
 			}
-			else if(databoot(k,2*i)==3) {
-				if(databoot(k,2*i+1)<=theta1new(0)){
+			else if(data(k,2)==3) {
+				if(data(k,2)<=theta1new(0)){
 					F2_c1new(0) = 	F2_c1new(0)+1;
 				}
 			}

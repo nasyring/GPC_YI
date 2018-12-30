@@ -41,6 +41,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector loglikdiff(1,0.0);
 	NumericVector r(1,0.0);
 	NumericVector uu(1,0.0);
+	NumericVector vv(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
 	NumericVector l0(1,0.0);
@@ -60,6 +61,15 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector F1_c1new(1,0.0);
 	NumericVector F2_c1old(1,0.0);
 	NumericVector F2_c1new(1,0.0);
+	NumericVector sumsamp0(1,0.0);
+	NumericVector sumsamp1(1,0.0);
+	NumericVector sumsamp0sq(1,0.0);
+	NumericVector sumsamp1sq(1,0.0);
+	NumericVector sumsamp01(1,0.0);
+	NumericVector ind0(1,0.0);
+	NumericVector s2x(1,0.0);
+	NumericVector s2y(1,0.0);
+	NumericVector sxy(1,0.0);
 
 	
 	for(int k=0; k<n; k++){
@@ -91,7 +101,24 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	F2_c1old(0) = 	F2_c1old(0)/n2(0);
 	
 	for(int j=0; j<(M+100); j++) {
-		theta0new(0) = R::rnorm(theta0old(0), 0.5);
+		if(j<=4){
+			theta0new(0) = R::rnorm(theta0old(0), 0.005);
+			theta1new(0) = R::rnorm(theta1old(0), 0.005);
+		}else {
+			vv[0] = R::runif(0.0,1.0);
+			if(vv[0]<=0.95){
+				theta0new(0) = R::rnorm(0.0, 1.0);
+				theta1new(0) = R::rnorm(0.0, 1.0);
+				s2x(0) = (2.38*2.38/2.0)*(sumsamp0sq(0)*(1/j) - pow((sumsamp0(0)*(1/j)),2.0));
+				s2y(0) = (2.38*2.38/2.0)*(sumsamp1sq(0)*(1/j) - pow((sumsamp1(0)*(1/j)),2.0));
+				sxy(0) = (2.38*2.38/2.0)*(sumsamp01(0)*(1/j) - (sumsamp0(0)*sumsamp1(0)*(1/j)*(1/j)));
+				theta0new(0) = theta0new(0)*sqrt(s2x(0))+theta0old(0);
+				theta1new(0) = theta1new(0)*sqrt(s2y(0)-pow(sxy(0),2.0)*(1/s2x(0))) + theta0new(0)*sxy(0)*(1/sqrt(s2x(0)))+theta1old(0);
+			}else {
+				theta0new(0) = R::rnorm(theta0old(0), 0.005);
+				theta1new(0) = R::rnorm(theta1old(0), 0.005);					
+			}
+		}
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			if(databoot(k,2*i)==1){
@@ -110,6 +137,16 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		loglikdiff(0) = w[0]*10.0*(F0_c0new(0)-F0_c0old(0)-F1_c0new(0)+F1_c0old(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff(0)) {
+			ind0 = 1.0;
+			sumsamp0(0)=sumsamp0(0)+theta0new(0);
+			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
+		}
+		else {
+			ind0=0.0;
+			sumsamp0(0)=sumsamp0(0)+theta0old(0);
+			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
+		}
       		if((uu(0) <= loglikdiff(0)) && (j>99)) {
 			postsamples0(j-100) = theta0new(0);
 			theta0old(0) = theta0new(0);
@@ -119,7 +156,6 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		else if(j>99){
 			postsamples0(j-100) = theta0old(0);	
 		}
-		theta1new[0] = R::rnorm(theta1old(0), 0.5);
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			if(databoot(k,2*i)==2){
@@ -138,6 +174,26 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		loglikdiff(0) = w[0]*10.0*(F1_c1new(0)-F1_c1old(0)-F2_c1new(0)+F2_c1old(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff(0)) {
+			sumsamp1(0)=sumsamp1(0)+theta1new(0);
+			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
+			if(ind0 == 1.0){
+				sumsamp01(0) = sumsamp01(0) theta1new(0)*theta0new(0); 	
+			}
+			else {
+				sumsamp01(0) = sumsamp01(0) theta1new(0)*theta0old(0);
+			}
+		}
+		else {
+			sumsamp1(0)=sumsamp1(0)+theta1old(0);
+			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
+			if(ind0 == 1.0){
+				sumsamp01(0) = sumsamp01(0) theta1old(0)*theta0new(0); 	
+			}
+			else {
+				sumsamp01(0) = sumsamp01(0) theta1old(0)*theta0old(0);
+			}
+		}
       		if((uu(0) <= loglikdiff(0)) && (j>99)) {
 			postsamples1(j-100) = theta1new(0);
 			theta1old(0) = theta1new(0); 
@@ -147,6 +203,11 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		else if(j>99){
 			postsamples1(j-100) = theta1old(0);	
 		}
+		
+		sumsamp1(0);
+		sumsamp0sq(0);
+		sumsamp1sq(0);
+		sumsamp01(0);
 	}
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());

@@ -48,8 +48,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
 	NumericVector u1(1,0.0);
-	theta0old = thetaboot(i,0);
-	theta1old = thetaboot(i,1);
+	theta0old(0) = thetaboot(i,0);
+	theta1old(0) = thetaboot(i,1);
 	NumericVector n0(1,0.0);
 	NumericVector n1(1,0.0);
 	NumericVector n2(1,0.0);
@@ -118,8 +118,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				theta1new(0) = theta1new(0)*sqrt(s2y(0)-pow(sxy(0),2.0)*(1/s2x(0))) + theta0new(0)*sxy(0)*(1/sqrt(s2x(0)))+theta1old(0);
 			}
 			else {
-				theta0new(0) = R::rnorm(theta0old(0), 0.05);
-				theta1new(0) = R::rnorm(theta1old(0), 0.05);					
+				theta0new(0) = R::rnorm(theta0old(0), 0.1);
+				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
 			}
 		}
 		loglikdiff(0) = 0.0;
@@ -167,7 +167,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 					F1_c1new(0) = 	F1_c1new(0)+1;
 				}	
 			}
-			else {
+			else if(databoot(k,2*i)==3) {
 				if(databoot(k,2*i+1)<=theta1new(0)){
 					F2_c1new(0) = 	F2_c1new(0)+1;
 				}

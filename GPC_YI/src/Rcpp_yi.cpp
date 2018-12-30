@@ -138,12 +138,12 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
-			ind0 = 1.0;
+			ind0(0) = 1.0;
 			sumsamp0(0)=sumsamp0(0)+theta0new(0);
 			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
 		}
 		else {
-			ind0=0.0;
+			ind0(0)=0.0;
 			sumsamp0(0)=sumsamp0(0)+theta0old(0);
 			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
 		}
@@ -204,10 +204,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 			postsamples1(j-100) = theta1old(0);	
 		}
 		
-		sumsamp1(0);
-		sumsamp0sq(0);
-		sumsamp1sq(0);
-		sumsamp01(0);
+
 	}
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());

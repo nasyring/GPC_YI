@@ -109,7 +109,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		else {
 			vv[0] = R::runif(0.0,1.0);
 			if(vv[0]<=0.95){
-				acc(0)=acc(0)+1;
+				acc0(0)=acc0(0)+1;
 				theta0new(0) = R::rnorm(0.0, 1.0);
 				theta1new(0) = R::rnorm(0.0, 1.0);
 				s2x(0) = (2.38*2.38/2.0)*(sumsamp0sq(0)*(1/j) - pow((sumsamp0(0)*(1/j)),2.0));

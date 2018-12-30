@@ -177,21 +177,21 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		if(uu(0) <= loglikdiff(0)) {
 			sumsamp1(0)=sumsamp1(0)+theta1new(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
-			if(ind0 == 1.0){
-				sumsamp01(0) = sumsamp01(0) theta1new(0)*theta0new(0); 	
+			if(ind0(0) == 1.0){
+				sumsamp01(0) = sumsamp01(0)+ theta1new(0)*theta0new(0); 	
 			}
 			else {
-				sumsamp01(0) = sumsamp01(0) theta1new(0)*theta0old(0);
+				sumsamp01(0) = sumsamp01(0)+ theta1new(0)*theta0old(0);
 			}
 		}
 		else {
 			sumsamp1(0)=sumsamp1(0)+theta1old(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
-			if(ind0 == 1.0){
-				sumsamp01(0) = sumsamp01(0) theta1old(0)*theta0new(0); 	
+			if(ind0(0) == 1.0){
+				sumsamp01(0) = sumsamp01(0)+ theta1old(0)*theta0new(0); 	
 			}
 			else {
-				sumsamp01(0) = sumsamp01(0) theta1old(0)*theta0old(0);
+				sumsamp01(0) = sumsamp01(0)+ theta1old(0)*theta0old(0);
 			}
 		}
       		if((uu(0) <= loglikdiff(0)) && (j>99)) {

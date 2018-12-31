@@ -114,8 +114,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				s2x(0) = (2.38*2.38/2.0)*(sumsamp0sq(0)*(1/j) - pow((sumsamp0(0)*(1/j)),2.0));
 				s2y(0) = (2.38*2.38/2.0)*(sumsamp1sq(0)*(1/j) - pow((sumsamp1(0)*(1/j)),2.0));
 				sxy(0) = (2.38*2.38/2.0)*(sumsamp01(0)*(1/j) - (sumsamp0(0)*sumsamp1(0)*(1/j)*(1/j)));
-				theta0new(0) = theta0new(0)*sqrt(s2x(0))+theta0old(0);
-				theta1new(0) = theta1new(0)*sqrt(s2y(0)-pow(sxy(0),2.0)*(1/s2x(0))) + theta0new(0)*sxy(0)*(1/sqrt(s2x(0)))+theta1old(0);
+				theta0new(0) = (theta0new(0)*sqrt(s2x(0)))+theta0old(0);
+				theta1new(0) = (theta1new(0)*sqrt(s2y(0)-(pow(sxy(0),2.0)*(1/s2x(0))))) + (theta0new(0)*sxy(0)*(1/sqrt(s2x(0))))+theta1old(0);
 			}
 			else {
 				theta0new(0) = R::rnorm(theta0old(0), 0.1);
@@ -244,6 +244,9 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector postsamples1(M,0.0);
 	NumericVector thetaprop0(M,0.0);
 	NumericVector thetaprop1(M,0.0);
+	NumericVector s2xcalc(M,0.0);
+	NumericVector s2ycalc(M,0.0);
+	NumericVector sxycalc(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -314,14 +317,17 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 				s2x(0) = (2.38*2.38/2.0)*(sumsamp0sq(0)*(1/j) - pow((sumsamp0(0)*(1/j)),2.0));
 				s2y(0) = (2.38*2.38/2.0)*(sumsamp1sq(0)*(1/j) - pow((sumsamp1(0)*(1/j)),2.0));
 				sxy(0) = (2.38*2.38/2.0)*(sumsamp01(0)*(1/j) - (sumsamp0(0)*sumsamp1(0)*(1/j)*(1/j)));
-				theta0new(0) = theta0new(0)*sqrt(s2x(0))+theta0old(0);
-				theta1new(0) = theta1new(0)*sqrt(s2y(0)-pow(sxy(0),2.0)*(1/s2x(0))) + theta0new(0)*sxy(0)*(1/sqrt(s2x(0)))+theta1old(0);
+				theta0new(0) = (theta0new(0)*sqrt(s2x(0)))+theta0old(0);
+				theta1new(0) = (theta1new(0)*sqrt(s2y(0)-(pow(sxy(0),2.0)*(1/s2x(0))))) + (theta0new(0)*sxy(0)*(1/sqrt(s2x(0))))+theta1old(0);
 			}
 			else {
 				theta0new(0) = R::rnorm(theta0old(0), 0.1);
 				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
 			}
 		}
+		s2xcalc(j)=s2x(0);
+		s2ycalc(j)=s2y(0);
+		sxycalc(j)=sxy(0);
 		thetaprop0(j) = theta0new(0);
 		thetaprop1(j) = theta1new(0);
 		loglikdiff(0) = 0.0;
@@ -422,7 +428,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	//result = Rcpp::List::create(Rcpp::Named("l0") = l0[0],Rcpp::Named("u0") = u0[0],Rcpp::Named("l1") = l1[0],Rcpp::Named("u1") = u1[0]);
 	result = Rcpp::List::create(Rcpp::Named("sumsamp0") = sumsamp0,Rcpp::Named("sumsamp1") = sumsamp1,Rcpp::Named("sumsamp0sq") = sumsamp0sq,Rcpp::Named("sumsamp1sq") = sumsamp1sq,Rcpp::Named("sumsamp01") = sumsamp01,
 				   Rcpp::Named("samp0") = postsamples0, Rcpp::Named("samp1") = postsamples1,
-				   Rcpp::Named("prop0") = thetaprop0, Rcpp::Named("prop1") = thetaprop1);
+				   Rcpp::Named("prop0") = thetaprop0, Rcpp::Named("prop1") = thetaprop1,
+				   Rcpp::Named("s2x") = s2xcalc, Rcpp::Named("s2y") = s2ycalc,Rcpp::Named("sxy") = sxycalc);
 
 	return result;
 }

@@ -111,9 +111,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 			if(vv[0]<=0.95){
 				theta0new(0) = R::rnorm(0.0, 1.0);
 				theta1new(0) = R::rnorm(0.0, 1.0);
-				s2x(0) = (2.38*2.38/2.0)*(sumsamp0sq(0)*(1/j) - pow((sumsamp0(0)*(1/j)),2.0));
-				s2y(0) = (2.38*2.38/2.0)*(sumsamp1sq(0)*(1/j) - pow((sumsamp1(0)*(1/j)),2.0));
-				sxy(0) = (2.38*2.38/2.0)*(sumsamp01(0)*(1/j) - (sumsamp0(0)*sumsamp1(0)*(1/j)*(1/j)));
+				s2x(0) = (2.38*(2.38/2.0))*((sumsamp0sq(0)/j) - pow((sumsamp0(0)/j),2.0));
+				s2y(0) = (2.38*(2.38/2.0))*((sumsamp1sq(0)/j) - pow((sumsamp1(0)/j),2.0));
+				sxy(0) = (2.38*(2.38/2.0))*((sumsamp01(0)/j) - (sumsamp0(0)*sumsamp1(0)/(j*j)));
 				theta0new(0) = (theta0new(0)*sqrt(s2x(0)))+theta0old(0);
 				theta1new(0) = (theta1new(0)*sqrt(s2y(0)-(pow(sxy(0),2.0)*(1/s2x(0))))) + (theta0new(0)*sxy(0)*(1/sqrt(s2x(0))))+theta1old(0);
 			}
@@ -121,6 +121,10 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				theta0new(0) = R::rnorm(theta0old(0), 0.1);
 				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
 			}
+		}
+		if(theta0new(0)>theta1new(0)){
+			theta0new(0) = theta0old(0);
+			theta1new(0) = theta1old(0);			
 		}
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
@@ -324,6 +328,10 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 				theta0new(0) = R::rnorm(theta0old(0), 0.1);
 				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
 			}
+		}
+		if(theta0new(0)>theta1new(0)){
+			theta0new(0) = theta0old(0);
+			theta1new(0) = theta1old(0);			
 		}
 		s2xcalc(j)=s2x(0);
 		s2ycalc(j)=s2y(0);

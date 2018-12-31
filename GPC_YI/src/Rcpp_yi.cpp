@@ -236,6 +236,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	List result;
 	int M = int(M_samp[0]);
 	int n = int(nn[0]);
+   	NumericVector datamin(1,0.0);
+	NumericVector datamax(1,0.0);
    	NumericVector theta0old(1,0.0);
 	NumericVector theta0new(1,0.0);
 	NumericVector theta1old(1,0.0);
@@ -280,6 +282,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector acc0(1,0.0);
 	
 	
+	
+	
 	for(int k=0; k<n; k++){
 		if(data(k,0)==1){
 			n0(0) = n0(0) + 1.0;
@@ -300,6 +304,18 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			n2(0) = n2(0) + 1.0;
 			if(data(k,1)<=theta1old(0)){
 				F2_c1old(0) = 	F2_c1old(0)+1.0;
+			}
+		}
+		if(k==1){
+			datamin(0) = data(k,1);
+			datamax(0) = data(k,1);
+		}
+		else {
+			if(datamin(0) > data(k,1)){
+				datamin(0) = data(k,1);	
+			}
+			if(datamax(0) < data(k,1)){
+				datamax(0) = data(k,1);	
 			}
 		}
 	}
@@ -331,6 +347,12 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		}
 		if(theta0new(0)>theta1new(0)){
 			theta0new(0) = theta0old(0);
+			theta1new(0) = theta1old(0);			
+		}
+		if(theta0new(0)<datamin(0)){
+			theta0new(0) = theta0old(0);			
+		}
+		if(theta1new(0)>datamax(0)){
 			theta1new(0) = theta1old(0);			
 		}
 		s2xcalc(j)=s2x(0);

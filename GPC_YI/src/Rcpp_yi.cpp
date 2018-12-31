@@ -363,7 +363,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		F1_c0new(0) = 	F1_c0new(0)/n1(0);
 		F1_c1new(0) = 	F1_c1new(0)/n1(0);
 		F2_c1new(0) = 	F2_c1new(0)/n2(0);
-		F1_c1 + F2_c2 - F2_c1 - F3_c2
+	
 		loglikdiff(0) = w[0]*10.0*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);

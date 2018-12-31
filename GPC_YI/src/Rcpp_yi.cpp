@@ -408,8 +408,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		
 
 	}
-	std::sort(postsamples0.begin(), postsamples0.end());
-	std::sort(postsamples1.begin(), postsamples1.end());
+	//std::sort(postsamples0.begin(), postsamples0.end());
+	//std::sort(postsamples1.begin(), postsamples1.end());
 	l0[0] = postsamples0(0.025*M);
 	u0[0] = postsamples0(0.975*M);
 	l1[0] = postsamples1(0.025*M);

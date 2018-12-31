@@ -342,89 +342,55 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		for(int k=0; k<n; k++){
 			if(data(k,0)==1){
 				if(data(k,1)<=theta0new(0)){
-					F0_c0new(0) = 	F0_c0new(0)+1;
+					F0_c0new(0) = 	F0_c0new(0)+1.0;
 				}	
 			}
 			else if(data(k,0)==2){
 				if(data(k,1)<=theta0new(0)){
-					F1_c0new(0) = 	F1_c0new(0)+1;
+					F1_c0new(0) = 	F1_c0new(0)+1.0;
+				}
+				if(data(k,1)<=theta1new(0)){
+					F1_c1new(0) = 	F1_c1new(0)+1.0;
+				}	
+			}
+			else {
+				if(data(k,1)<=theta1new(0)){
+					F2_c1new(0) = 	F2_c1new(0)+1.0;
 				}
 			}
 		}
 		F0_c0new(0) = 	F0_c0new(0)/n0(0);
 		F1_c0new(0) = 	F1_c0new(0)/n1(0);
-		loglikdiff(0) = w[0]*10.0*(F0_c0new(0)-F0_c0old(0)-F1_c0new(0)+F1_c0old(0));
-		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
-		uu[0] = R::runif(0.0,1.0);
-		if(uu(0) <= loglikdiff(0)) {
-			ind0(0) = 1.0;
-			sumsamp0(0)=sumsamp0(0)+theta0new(0);
-			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
-		}
-		else {
-			ind0(0)=0.0;
-			sumsamp0(0)=sumsamp0(0)+theta0old(0);
-			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
-		}
-      		if(uu(0) <= loglikdiff(0))  {
-			postsamples0(j) = theta0new(0);
-			theta0old(0) = theta0new(0);
-			F0_c0old(0)=F0_c0new(0);
-			F1_c0old(0)=F1_c0new(0);
-			//acc0(0) = acc0(0)+1.0;
-      		}
-		else {
-			postsamples0(j) = theta0old(0);	
-		}
-		loglikdiff(0) = 0.0;
-		for(int k=0; k<n; k++){
-			if(data(k,0)==2){
-				if(data(k,1)<=theta1new(0)){
-					F1_c1new(0) = 	F1_c1new(0)+1;
-				}	
-			}
-			else if(data(k,0)==3) {
-				if(data(k,1)<=theta1new(0)){
-					F2_c1new(0) = 	F2_c1new(0)+1;
-				}
-			}
-		}
 		F1_c1new(0) = 	F1_c1new(0)/n1(0);
 		F2_c1new(0) = 	F2_c1new(0)/n2(0);
-		loglikdiff(0) = w[0]*10.0*(F1_c1new(0)-F1_c1old(0)-F2_c1new(0)+F2_c1old(0));
+		F1_c1 + F2_c2 - F2_c1 - F3_c2
+		loglikdiff(0) = w[0]*10.0*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
-			sumsamp1(0)=sumsamp1(0)+theta1new(0);
-			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
-			if(ind0(0) == 1.0){
-				sumsamp01(0) = sumsamp01(0)+ theta1new(0)*theta0new(0); 	
-			}
-			else {
-				sumsamp01(0) = sumsamp01(0)+ theta1new(0)*theta0old(0);
-			}
-		}
-		else {
-			sumsamp1(0)=sumsamp1(0)+theta1old(0);
-			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
-			if(ind0(0) == 1.0){
-				sumsamp01(0) = sumsamp01(0)+ theta1old(0)*theta0new(0); 	
-			}
-			else {
-				sumsamp01(0) = sumsamp01(0)+ theta1old(0)*theta0old(0);
-			}
-		}
-      		if(uu(0) <= loglikdiff(0)) {
+			postsamples0(j) = theta0new(0);
 			postsamples1(j) = theta1new(0);
-			theta1old(0) = theta1new(0); 
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			F0_c0old(0)=F0_c0new(0);
+			F1_c0old(0)=F1_c0new(0);
 			F1_c1old(0)=F1_c1new(0);
 			F2_c1old(0)=F2_c1new(0);
-      		}
-		else {
-			postsamples1(j) = theta1old(0);	
+			sumsamp0(0)=sumsamp0(0)+theta0new(0);
+			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
+			sumsamp1(0)=sumsamp1(0)+theta1new(0);
+			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
+			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
 		}
-		
-
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			sumsamp0(0)=sumsamp0(0)+theta0old(0);
+			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
+			sumsamp1(0)=sumsamp1(0)+theta1old(0);
+			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
+			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
+		}
 	}
 	//std::sort(postsamples0.begin(), postsamples0.end());
 	//std::sort(postsamples1.begin(), postsamples1.end());

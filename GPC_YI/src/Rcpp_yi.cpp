@@ -242,6 +242,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector vv(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
+	NumericVector thetaprop0(M,0.0);
+	NumericVector thetaprop1(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -320,6 +322,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
 			}
 		}
+		thetaprop0(j) = theta0new(0);
+		thetaprop1(j) = theta1new(0);
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			if(data(k,0)==1){

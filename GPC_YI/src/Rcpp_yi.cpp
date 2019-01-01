@@ -260,8 +260,9 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector s2x(1,0.0);
 	NumericVector s2y(1,0.0);
 	NumericVector sxy(1,0.0);
-
-	
+	NumericVector YI(M,0.0);
+	NumericVector YIl(1,0.0);
+	NumericVector YIu(1,0.0);
 	
 	
 	
@@ -379,6 +380,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			sumsamp1(0)=sumsamp1(0)+theta1new(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
 			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
+			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0) + 1;
 		}
 		else {
 			postsamples0(j) = theta0old(0);
@@ -388,17 +390,21 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			sumsamp1(0)=sumsamp1(0)+theta1old(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
 			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0) + 1;
 		}
 	}
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());
+	std::sort(YI.begin(), YI.end());
 	l0[0] = postsamples0(0.025*M);
 	u0[0] = postsamples0(0.975*M);
 	l1[0] = postsamples1(0.025*M);
 	u1[0] = postsamples1(0.975*M);
+	YIl[0] = YI(0.025*M);
+	YIu[0] = YI(0.975*M);
 	
 	//result = Rcpp::List::create(Rcpp::Named("l0") = l0[0],Rcpp::Named("u0") = u0[0],Rcpp::Named("l1") = l1[0],Rcpp::Named("u1") = u1[0]);
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu);
 
 	return result;
 }

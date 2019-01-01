@@ -31,9 +31,11 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	RVector<double> alpha, RVector<double> M_samp, RVector<double> w, std::size_t i) {
    	
 
-	double cov_ind;
 	int M = int(M_samp[0]);
 	int n = int(nn[0]);
+	double cov_ind = 0.0;
+   	NumericVector datamin(1,0.0);
+	NumericVector datamax(1,0.0);
    	NumericVector theta0old(1,0.0);
 	NumericVector theta0new(1,0.0);
 	NumericVector theta1old(1,0.0);
@@ -48,8 +50,6 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
 	NumericVector u1(1,0.0);
-	theta0old(0) = thetaboot(i,0);
-	theta1old(0) = thetaboot(i,1);
 	NumericVector n0(1,0.0);
 	NumericVector n1(1,0.0);
 	NumericVector n2(1,0.0);
@@ -66,11 +66,12 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector sumsamp0sq(1,0.0);
 	NumericVector sumsamp1sq(1,0.0);
 	NumericVector sumsamp01(1,0.0);
-	NumericVector ind0(1,0.0);
 	NumericVector s2x(1,0.0);
 	NumericVector s2y(1,0.0);
 	NumericVector sxy(1,0.0);
-	NumericVector acc0(1,0.0);
+	theta0old(0) = thetaboot(i,0);
+	theta1old(0) = thetaboot(i,1);
+
 
 	
 	for(int k=0; k<n; k++){
@@ -95,13 +96,25 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				F2_c1old(0) = 	F2_c1old(0)+1;
 			}
 		}
+		if(k==1){
+			datamin(0) = databoot(k,2*i+1);
+			datamax(0) = databoot(k,2*i+1);
+		}
+		else {
+			if(datamin(0) > databoot(k,2*i+1)){
+				datamin(0) = databoot(k,2*i+1);	
+			}
+			if(datamax(0) < databoot(k,2*i+1)){
+				datamax(0) = databoot(k,2*i+1);	
+			}
+		}
 	}
 	F0_c0old(0) = 	F0_c0old(0)/n0(0);
 	F1_c0old(0) = 	F1_c0old(0)/n1(0);
 	F1_c1old(0) = 	F1_c1old(0)/n1(0);
 	F2_c1old(0) = 	F2_c1old(0)/n2(0);
 	
-	for(int j=0; j<(M+100); j++) {
+	for(int j=0; j<M; j++) {
 		if(j<=16){
 			theta0new(0) = R::rnorm(theta0old(0), .1);
 			theta1new(0) = R::rnorm(theta1old(0), .1);
@@ -126,94 +139,68 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 			theta0new(0) = theta0old(0);
 			theta1new(0) = theta1old(0);			
 		}
+		if(theta0new(0)<datamin(0)){
+			theta0new(0) = theta0old(0);			
+		}
+		if(theta1new(0)>datamax(0)){
+			theta1new(0) = theta1old(0);			
+		}
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			if(databoot(k,2*i)==1){
 				if(databoot(k,2*i+1)<=theta0new(0)){
-					F0_c0new(0) = 	F0_c0new(0)+1;
+					F0_c0new(0) = 	F0_c0new(0)+1.0;
 				}	
 			}
 			else if(databoot(k,2*i)==2){
 				if(databoot(k,2*i+1)<=theta0new(0)){
-					F1_c0new(0) = 	F1_c0new(0)+1;
+					F1_c0new(0) = 	F1_c0new(0)+1.0;
+				}
+				if(databoot(k,2*i+1)<=theta1new(0)){
+					F1_c1new(0) = 	F1_c1new(0)+1.0;
+				}	
+			}
+			else {
+				if(databoot(k,2*i+1)<=theta1new(0)){
+					F2_c1new(0) = 	F2_c1new(0)+1.0;
 				}
 			}
 		}
 		F0_c0new(0) = 	F0_c0new(0)/n0(0);
 		F1_c0new(0) = 	F1_c0new(0)/n1(0);
-		loglikdiff(0) = w[0]*10.0*(F0_c0new(0)-F0_c0old(0)-F1_c0new(0)+F1_c0old(0));
-		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
-		uu[0] = R::runif(0.0,1.0);
-		if(uu(0) <= loglikdiff(0)) {
-			ind0(0) = 1.0;
-			sumsamp0(0)=sumsamp0(0)+theta0new(0);
-			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
-		}
-		else {
-			ind0(0)=0.0;
-			sumsamp0(0)=sumsamp0(0)+theta0old(0);
-			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
-		}
-      		if((uu(0) <= loglikdiff(0)) && (j>99)) {
-			postsamples0(j-100) = theta0new(0);
-			theta0old(0) = theta0new(0);
-			F0_c0old(0)=F0_c0new(0);
-			F1_c0old(0)=F1_c0new(0);
-			//acc0(0) = acc0(0)+1.0;
-      		}
-		else if(j>99){
-			postsamples0(j-100) = theta0old(0);	
-		}
-		loglikdiff(0) = 0.0;
-		for(int k=0; k<n; k++){
-			if(databoot(k,2*i)==2){
-				if(databoot(k,2*i+1)<=theta1new(0)){
-					F1_c1new(0) = 	F1_c1new(0)+1;
-				}	
-			}
-			else if(databoot(k,2*i)==3) {
-				if(databoot(k,2*i+1)<=theta1new(0)){
-					F2_c1new(0) = 	F2_c1new(0)+1;
-				}
-			}
-		}
 		F1_c1new(0) = 	F1_c1new(0)/n1(0);
 		F2_c1new(0) = 	F2_c1new(0)/n2(0);
-		loglikdiff(0) = w[0]*10.0*(F1_c1new(0)-F1_c1old(0)-F2_c1new(0)+F2_c1old(0));
+	
+		loglikdiff(0) = w[0]*10.0*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
-			sumsamp1(0)=sumsamp1(0)+theta1new(0);
-			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
-			if(ind0(0) == 1.0){
-				sumsamp01(0) = sumsamp01(0)+ theta1new(0)*theta0new(0); 	
-			}
-			else {
-				sumsamp01(0) = sumsamp01(0)+ theta1new(0)*theta0old(0);
-			}
-		}
-		else {
-			sumsamp1(0)=sumsamp1(0)+theta1old(0);
-			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
-			if(ind0(0) == 1.0){
-				sumsamp01(0) = sumsamp01(0)+ theta1old(0)*theta0new(0); 	
-			}
-			else {
-				sumsamp01(0) = sumsamp01(0)+ theta1old(0)*theta0old(0);
-			}
-		}
-      		if((uu(0) <= loglikdiff(0)) && (j>99)) {
-			postsamples1(j-100) = theta1new(0);
-			theta1old(0) = theta1new(0); 
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			F0_c0old(0)=F0_c0new(0);
+			F1_c0old(0)=F1_c0new(0);
 			F1_c1old(0)=F1_c1new(0);
 			F2_c1old(0)=F2_c1new(0);
-      		}
-		else if(j>99){
-			postsamples1(j-100) = theta1old(0);	
+			sumsamp0(0)=sumsamp0(0)+theta0new(0);
+			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
+			sumsamp1(0)=sumsamp1(0)+theta1new(0);
+			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
+			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
 		}
-		
-
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			sumsamp0(0)=sumsamp0(0)+theta0old(0);
+			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
+			sumsamp1(0)=sumsamp1(0)+theta1old(0);
+			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
+			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
+		}
 	}
+
+
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());
 	l0[0] = postsamples0(0.025*M);
@@ -248,11 +235,6 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector vv(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
-	NumericVector thetaprop0(M,0.0);
-	NumericVector thetaprop1(M,0.0);
-	NumericVector s2xcalc(M,0.0);
-	NumericVector s2ycalc(M,0.0);
-	NumericVector sxycalc(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -275,11 +257,10 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector sumsamp0sq(1,0.0);
 	NumericVector sumsamp1sq(1,0.0);
 	NumericVector sumsamp01(1,0.0);
-	NumericVector ind0(1,0.0);
 	NumericVector s2x(1,0.0);
 	NumericVector s2y(1,0.0);
 	NumericVector sxy(1,0.0);
-	NumericVector acc0(1,0.0);
+
 	
 	
 	
@@ -355,11 +336,6 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		if(theta1new(0)>datamax(0)){
 			theta1new(0) = theta1old(0);			
 		}
-		s2xcalc(j)=s2x(0);
-		s2ycalc(j)=s2y(0);
-		sxycalc(j)=sxy(0);
-		thetaprop0(j) = theta0new(0);
-		thetaprop1(j) = theta1new(0);
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			if(data(k,0)==1){
@@ -414,18 +390,15 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
 		}
 	}
-	//std::sort(postsamples0.begin(), postsamples0.end());
-	//std::sort(postsamples1.begin(), postsamples1.end());
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
 	l0[0] = postsamples0(0.025*M);
 	u0[0] = postsamples0(0.975*M);
 	l1[0] = postsamples1(0.025*M);
 	u1[0] = postsamples1(0.975*M);
 	
 	//result = Rcpp::List::create(Rcpp::Named("l0") = l0[0],Rcpp::Named("u0") = u0[0],Rcpp::Named("l1") = l1[0],Rcpp::Named("u1") = u1[0]);
-	result = Rcpp::List::create(Rcpp::Named("sumsamp0") = sumsamp0,Rcpp::Named("sumsamp1") = sumsamp1,Rcpp::Named("sumsamp0sq") = sumsamp0sq,Rcpp::Named("sumsamp1sq") = sumsamp1sq,Rcpp::Named("sumsamp01") = sumsamp01,
-				   Rcpp::Named("samp0") = postsamples0, Rcpp::Named("samp1") = postsamples1,
-				   Rcpp::Named("prop0") = thetaprop0, Rcpp::Named("prop1") = thetaprop1,
-				   Rcpp::Named("s2x") = s2xcalc, Rcpp::Named("s2y") = s2ycalc,Rcpp::Named("sxy") = sxycalc);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1);
 
 	return result;
 }

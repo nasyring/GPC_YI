@@ -390,7 +390,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			sumsamp1(0)=sumsamp1(0)+theta1old(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
 			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
-			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0) + 1;
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
 	std::sort(postsamples0.begin(), postsamples0.end());

@@ -229,10 +229,25 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		 if (swapped == false) 
 			break;
         }
-	l0[0] = postsamples0(0.05*M-1);
-	u0[0] = postsamples0(M-1);
-	l1[0] = postsamples1(0.05*M-1);
-	u1[0] = postsamples1(M-1);
+	l0[0] = 100000;
+	u0[0] = -100000;
+	l1[0] = 100000;
+	u1[0] = -100000;
+	for(int i = (0.05*M-1); i<M-1; i++){
+		if(l0[0]>postsamples0(i)){
+			l0[0]=postsamples0(i);
+		}
+		if(u0[0]<postsamples0(i)){
+			u0[0]=postsamples0(i);
+		}
+		if(l1[0]>postsamples1(i)){
+			l1[0]=postsamples1(i);
+		}
+		if(u1[0]>postsamples1(i)){
+			u1[0]=postsamples1(i);
+		}
+	}
+
 	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
 		cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
@@ -444,10 +459,24 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			break;
         }
 			
-	l0[0] = postsamples0(0.05*M-1);
-	u0[0] = postsamples0(M-1);
-	l1[0] = postsamples1(0.05*M-1);
-	u1[0] = postsamples1(M-1);
+	l0[0] = 100000;
+	u0[0] = -100000;
+	l1[0] = 100000;
+	u1[0] = -100000;
+	for(int i = (0.05*M-1); i<M-1; i++){
+		if(l0[0]>postsamples0(i)){
+			l0[0]=postsamples0(i);
+		}
+		if(u0[0]<postsamples0(i)){
+			u0[0]=postsamples0(i);
+		}
+		if(l1[0]>postsamples1(i)){
+			l1[0]=postsamples1(i);
+		}
+		if(u1[0]>postsamples1(i)){
+			u1[0]=postsamples1(i);
+		}
+	}
 	YIl[0] = YI(0.025*M-1);
 	YIu[0] = YI(0.975*M-1);
 	

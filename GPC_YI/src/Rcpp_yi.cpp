@@ -243,7 +243,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		if(l1[0]>postsamples1(i)){
 			l1[0]=postsamples1(i);
 		}
-		if(u1[0]>postsamples1(i)){
+		if(u1[0]<postsamples1(i)){
 			u1[0]=postsamples1(i);
 		}
 	}
@@ -473,7 +473,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		if(l1[0]>postsamples1(i)){
 			l1[0]=postsamples1(i);
 		}
-		if(u1[0]>postsamples1(i)){
+		if(u1[0]<postsamples1(i)){
 			u1[0]=postsamples1(i);
 		}
 	}

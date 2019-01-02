@@ -216,7 +216,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	bool swapped;	
         for (int i = 0; i < M-1; i++){ 
 		 swapped = false; 
-       		 for (j = 0; j < n-i-1; j++){  
+       		 for (int j = 0; j < n-i-1; j++){  
            		 if (YI(j) > YI(j+1)){ 
 				 swapped = true;
               			 swap(&YI(j), &YI(j+1)); 
@@ -421,7 +421,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	bool swapped;	
         for (int i = 0; i < M-1; i++){ 
 		 swapped = false; 
-       		 for (j = 0; j < n-i-1; j++){  
+       		 for (int j = 0; j < n-i-1; j++){  
            		 if (YI(j) > YI(j+1)){ 
 				 swapped = true;
               			 swap(&YI(j), &YI(j+1)); 
@@ -440,7 +440,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	YIl[0] = YI(0.025*M);
 	YIu[0] = YI(0.975*M);
 	
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu);
 
 	return result;
 }

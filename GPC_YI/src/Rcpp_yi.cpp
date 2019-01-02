@@ -23,12 +23,6 @@ inline double average(double val1, double val2) {
    return (val1 + val2) / 2;
 }
 
-void swap(double *xp, double *yp) 
-{ 
-    double temp = *xp; 
-    *xp = *yp; 
-    *yp = temp; 
-} 
   
 
 // helper function for Gibbs sampling
@@ -212,16 +206,24 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 		}
 	}
 
-
+	double tempYI;
+	double temppost0;
+	double temppost1;
 	bool swapped;	
         for (int i = 0; i < M-1; i++){ 
 		 swapped = false; 
        		 for (int j = 0; j < n-i-1; j++){  
            		 if (YI(j) > YI(j+1)){ 
 				 swapped = true;
-              			 swap(&YI(j), &YI(j+1)); 
-				 swap(&postsamples0(j), &postsamples0(j+1));
-				 swap(&postsamples1(j), &postsamples1(j+1));
+				 tempYI = YI(j);
+				 YI(j) = YI(j+1);
+				 YI(j+1) = tempYI;
+				 temppost0 = postsamples0(j);
+				 postsamples0(j) = postsamples0(j+1);
+				 postsamples0(j+1) = temppost0;				 
+				 temppost1 = postsamples1(j);
+				 postsamples1(j) = postsamples1(j+1);
+				 postsamples1(j+1) = temppost1;
 			 }
 		 }
 		 if (swapped == false) 
@@ -418,15 +420,24 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		}
 	}
 	
+	double tempYI;
+	double temppost0;
+	double temppost1;
 	bool swapped;	
         for (int i = 0; i < M-1; i++){ 
 		 swapped = false; 
        		 for (int j = 0; j < n-i-1; j++){  
            		 if (YI(j) > YI(j+1)){ 
 				 swapped = true;
-              			 swap(&YI(j), &YI(j+1)); 
-				 swap(&postsamples0(j), &postsamples0(j+1));
-				 swap(&postsamples1(j), &postsamples1(j+1));
+				 tempYI = YI(j);
+				 YI(j) = YI(j+1);
+				 YI(j+1) = tempYI;
+				 temppost0 = postsamples0(j);
+				 postsamples0(j) = postsamples0(j+1);
+				 postsamples0(j+1) = temppost0;				 
+				 temppost1 = postsamples1(j);
+				 postsamples1(j) = postsamples1(j+1);
+				 postsamples1(j+1) = temppost1;
 			 }
 		 }
 		 if (swapped == false) 

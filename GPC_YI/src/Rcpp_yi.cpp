@@ -23,6 +23,13 @@ inline double average(double val1, double val2) {
    return (val1 + val2) / 2;
 }
 
+void swap(double *xp, double *yp) 
+{ 
+    double temp = *xp; 
+    *xp = *yp; 
+    *yp = temp; 
+} 
+  
 
 // helper function for Gibbs sampling
 
@@ -71,6 +78,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector sxy(1,0.0);
 	theta0old(0) = thetaboot(i,0);
 	theta1old(0) = thetaboot(i,1);
+	NumericVector YI(M,0.0);
+	NumericVector YIl(1,0.0);
+	NumericVector YIu(1,0.0);
 
 
 	
@@ -188,6 +198,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 			sumsamp1(0)=sumsamp1(0)+theta1new(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
 			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
+			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
 		}
 		else {
 			postsamples0(j) = theta0old(0);
@@ -197,16 +208,29 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 			sumsamp1(0)=sumsamp1(0)+theta1old(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
 			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
 
 
-	std::sort(postsamples0.begin(), postsamples0.end());
-	std::sort(postsamples1.begin(), postsamples1.end());
-	l0[0] = postsamples0(0.025*M);
-	u0[0] = postsamples0(0.975*M);
-	l1[0] = postsamples1(0.025*M);
-	u1[0] = postsamples1(0.975*M);
+	bool swapped;	
+        for (int i = 0; i < M-1; i++){ 
+		 swapped = false; 
+       		 for (j = 0; j < n-i-1; j++){  
+           		 if (YI(j) > YI(j+1)){ 
+				 swapped = true;
+              			 swap(&YI(j), &YI(j+1)); 
+				 swap(&postsamples0(j), &postsamples0(j+1));
+				 swap(&postsamples1(j), &postsamples1(j+1));
+			 }
+		 }
+		 if (swapped == false) 
+			break;
+        }
+	l0[0] = postsamples0(0.05*M);
+	u0[0] = postsamples0(M);
+	l1[0] = postsamples1(0.05*M);
+	u1[0] = postsamples1(M);
 	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
 		cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
@@ -380,7 +404,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			sumsamp1(0)=sumsamp1(0)+theta1new(0);
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
 			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
-			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0) + 1;
+			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
 		}
 		else {
 			postsamples0(j) = theta0old(0);
@@ -393,17 +417,29 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
-	std::sort(postsamples0.begin(), postsamples0.end());
-	std::sort(postsamples1.begin(), postsamples1.end());
-	std::sort(YI.begin(), YI.end());
-	l0[0] = postsamples0(0.025*M);
-	u0[0] = postsamples0(0.975*M);
-	l1[0] = postsamples1(0.025*M);
-	u1[0] = postsamples1(0.975*M);
+	
+	bool swapped;	
+        for (int i = 0; i < M-1; i++){ 
+		 swapped = false; 
+       		 for (j = 0; j < n-i-1; j++){  
+           		 if (YI(j) > YI(j+1)){ 
+				 swapped = true;
+              			 swap(&YI(j), &YI(j+1)); 
+				 swap(&postsamples0(j), &postsamples0(j+1));
+				 swap(&postsamples1(j), &postsamples1(j+1));
+			 }
+		 }
+		 if (swapped == false) 
+			break;
+        }
+			
+	l0[0] = postsamples0(0.05*M);
+	u0[0] = postsamples0(M);
+	l1[0] = postsamples1(0.05*M);
+	u1[0] = postsamples1(M);
 	YIl[0] = YI(0.025*M);
 	YIu[0] = YI(0.975*M);
 	
-	//result = Rcpp::List::create(Rcpp::Named("l0") = l0[0],Rcpp::Named("u0") = u0[0],Rcpp::Named("l1") = l1[0],Rcpp::Named("u1") = u1[0]);
 	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu);
 
 	return result;

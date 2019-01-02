@@ -212,7 +212,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	bool swapped;	
         for (int i = 0; i < M-1; i++){ 
 		 swapped = false; 
-       		 for (int j = 0; j < n-i-1; j++){  
+       		 for (int j = 0; j < M-i-1; j++){  
            		 if (YI(j) > YI(j+1)){ 
 				 swapped = true;
 				 tempYI = YI(j);
@@ -426,7 +426,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	bool swapped;	
         for (int i = 0; i < M-1; i++){ 
 		 swapped = false; 
-       		 for (int j = 0; j < n-i-1; j++){  
+       		 for (int j = 0; j < M-i-1; j++){  
            		 if (YI(j) > YI(j+1)){ 
 				 swapped = true;
 				 tempYI = YI(j);

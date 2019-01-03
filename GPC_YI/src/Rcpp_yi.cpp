@@ -205,7 +205,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	double temppost0;
 	double temppost1;
 	bool swapped;	
-        for (int j = 0; j < M-1; i++){ 
+        for (int j = 0; j < M-1; j++){ 
 		 swapped = false; 
        		 for (int k = 0; k < M-j-1; k++){  
            		 if (YI(k) > YI(k+1)){ 
@@ -228,7 +228,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	u0[0] = -100000;
 	l1[0] = 100000;
 	u1[0] = -100000;
-	for(int j = (0.05*M-1); j<M; i++){
+	for(int j = (0.05*M-1); j<M; j++){
 		if(l0[0]>postsamples0(j)){
 			l0[0]=postsamples0(j);
 		}

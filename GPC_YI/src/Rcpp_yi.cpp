@@ -75,7 +75,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	NumericVector YI(M,0.0);
 	NumericVector YIl(1,0.0);
 	NumericVector YIu(1,0.0);
-
+	datamin(0) = databoot(0,2*i+1);
+	datamax(0) = databoot(0,2*i+1);
 
 	
 	for(int k=0; k<n; k++){
@@ -100,17 +101,11 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 				F2_c1old(0) = 	F2_c1old(0)+1;
 			}
 		}
-		if(k==1){
-			datamin(0) = databoot(k,2*i+1);
-			datamax(0) = databoot(k,2*i+1);
+		if(datamin(0) > databoot(k,2*i+1)){
+			datamin(0) = databoot(k,2*i+1);	
 		}
-		else {
-			if(datamin(0) > databoot(k,2*i+1)){
-				datamin(0) = databoot(k,2*i+1);	
-			}
-			if(datamax(0) < databoot(k,2*i+1)){
-				datamax(0) = databoot(k,2*i+1);	
-			}
+		if(datamax(0) < databoot(k,2*i+1)){
+			datamax(0) = databoot(k,2*i+1);	
 		}
 	}
 	F0_c0old(0) = 	F0_c0old(0)/n0(0);
@@ -210,20 +205,20 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	double temppost0;
 	double temppost1;
 	bool swapped;	
-        for (int i = 0; i < M-1; i++){ 
+        for (int j = 0; j < M-1; i++){ 
 		 swapped = false; 
-       		 for (int j = 0; j < M-i-1; j++){  
-           		 if (YI(j) > YI(j+1)){ 
+       		 for (int k = 0; k < M-j-1; k++){  
+           		 if (YI(k) > YI(k+1)){ 
 				 swapped = true;
-				 tempYI = YI(j);
-				 YI(j) = YI(j+1);
-				 YI(j+1) = tempYI;
-				 temppost0 = postsamples0(j);
-				 postsamples0(j) = postsamples0(j+1);
-				 postsamples0(j+1) = temppost0;				 
-				 temppost1 = postsamples1(j);
-				 postsamples1(j) = postsamples1(j+1);
-				 postsamples1(j+1) = temppost1;
+				 tempYI = YI(k);
+				 YI(k) = YI(k+1);
+				 YI(k+1) = tempYI;
+				 temppost0 = postsamples0(k);
+				 postsamples0(k) = postsamples0(k+1);
+				 postsamples0(k+1) = temppost0;				 
+				 temppost1 = postsamples1(k);
+				 postsamples1(k) = postsamples1(k+1);
+				 postsamples1(k+1) = temppost1;
 			 }
 		 }
 		 if (swapped == false) 
@@ -233,18 +228,18 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RMatrix<double
 	u0[0] = -100000;
 	l1[0] = 100000;
 	u1[0] = -100000;
-	for(int i = (0.05*M-1); i<M; i++){
-		if(l0[0]>postsamples0(i)){
-			l0[0]=postsamples0(i);
+	for(int j = (0.05*M-1); j<M; i++){
+		if(l0[0]>postsamples0(j)){
+			l0[0]=postsamples0(j);
 		}
-		if(u0[0]<postsamples0(i)){
-			u0[0]=postsamples0(i);
+		if(u0[0]<postsamples0(j)){
+			u0[0]=postsamples0(j);
 		}
-		if(l1[0]>postsamples1(i)){
-			l1[0]=postsamples1(i);
+		if(l1[0]>postsamples1(j)){
+			l1[0]=postsamples1(j);
 		}
-		if(u1[0]<postsamples1(i)){
-			u1[0]=postsamples1(i);
+		if(u1[0]<postsamples1(j)){
+			u1[0]=postsamples1(j);
 		}
 	}
 
@@ -304,7 +299,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector YI(M,0.0);
 	NumericVector YIl(1,0.0);
 	NumericVector YIu(1,0.0);
-	
+	datamin(0) = data(0,1);
+	datamax(0) = data(0,1);	
 	
 	
 	for(int k=0; k<n; k++){
@@ -329,17 +325,11 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 				F2_c1old(0) = 	F2_c1old(0)+1.0;
 			}
 		}
-		if(k==1){
-			datamin(0) = data(k,1);
-			datamax(0) = data(k,1);
+		if(datamin(0) > data(k,1)){
+			datamin(0) = data(k,1);	
 		}
-		else {
-			if(datamin(0) > data(k,1)){
-				datamin(0) = data(k,1);	
-			}
-			if(datamax(0) < data(k,1)){
-				datamax(0) = data(k,1);	
-			}
+		if(datamax(0) < data(k,1)){
+			datamax(0) = data(k,1);	
 		}
 	}
 	F0_c0old(0) = 	F0_c0old(0)/n0(0);
@@ -480,7 +470,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	YIl[0] = YI(0.025*M-1);
 	YIu[0] = YI(0.975*M-1);
 	
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin);
 
 	return result;
 }

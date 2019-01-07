@@ -120,7 +120,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		if(datamax(0) < databoot(k,2*i+1)){
 			datamax(0) = databoot(k,2*i+1);	
 		}
-		YIboot(0) = YIboot(0)+thetaboot(k);
+		YIboot(0) = YIboot(0)+thetaboot(k,2);
 	}
 	YIboot(0) = YIboot(0)/n;
 	F0_c0old(0) = 	F0_c0old(0)/n0(0);

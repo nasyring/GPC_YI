@@ -47,7 +47,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type nnp(nnpSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type priordata(priordataSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type priorweight(priorweightSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type priorweight(priorweightSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type thetaboot(thetabootSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);
@@ -73,7 +73,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type nnp(nnpSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type priordata(priordataSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type priorweight(priorweightSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type priorweight(priorweightSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type thetaboot(thetabootSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);

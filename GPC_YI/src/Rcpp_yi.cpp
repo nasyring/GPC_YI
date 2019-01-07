@@ -753,6 +753,9 @@ struct GPCYI_yi_mcmc_parallel : public Worker {
 
 	const RVector<double> nn;
 	const RMatrix<double> data;
+	const RVector<double> nnp;
+	const RMatrix<double> priordata;
+	const RVector<double> priorweight;
 	const RMatrix<double> thetaboot;
 	const RVector<double> bootmean0;
 	const RVector<double> bootmean1;
@@ -764,22 +767,22 @@ struct GPCYI_yi_mcmc_parallel : public Worker {
 	RVector<double> cover;
 
    // initialize with source and destination
-   GPCYI_yi_mcmc_parallel(const NumericVector nn,	const NumericMatrix data, const NumericMatrix thetaboot,
+   GPCYI_yi_mcmc_parallel(const NumericVector nn, const NumericMatrix data, const NumericVector nnp, const NumericMatrix priordata, const NumericVector priorweight, const NumericMatrix thetaboot,
 	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot,
 	const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp,
 	const NumericVector w, NumericVector cover) 
-			: nn(nn), data(data), thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot(databoot), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
+			: nn(nn), data(data), nnp(nnp), priordata(priordata), priorweight(priorweight),  thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot(databoot), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
 
    // operator
 void operator()(std::size_t begin, std::size_t end) {
 		for (std::size_t i = begin; i < end; i++) {
-			cover[i] = GibbsMCMC(nn, data, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, w, i);	
+			cover[i] = GibbsMCMC(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, w, i);	
 		}
 	}
 };
 
 // [[Rcpp::export]]
-NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericMatrix thetaboot, NumericVector bootmean0,
+NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot, NumericVector bootmean0,
 	NumericVector bootmean1, NumericMatrix databoot, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
 	NumericVector w) {
 	
@@ -788,7 +791,7 @@ NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericMatr
    NumericVector cover(B,2.0); 
 
    // create the worker
-   GPCYI_yi_mcmc_parallel gpcWorker(nn, data, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w, cover);
+   GPCYI_yi_mcmc_parallel gpcWorker(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w, cover);
      
    // call it with parallelFor
    
@@ -802,7 +805,7 @@ NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericMatr
 
 
 // [[Rcpp::export]]
-Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {
+Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & nnp, SEXP & priordata, SEXP & priorweight, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {
 
 RNGScope scp;
 Rcpp::Function _GPCYI_rcpp_parallel_yi("rcpp_parallel_yi");
@@ -811,6 +814,9 @@ List finalsample;
 double eps 			= 0.01; 
 NumericVector nn_ = Rcpp::as<NumericVector>(nn);
 NumericMatrix data_ = Rcpp::as<NumericMatrix>(data);
+NumericVector nnp_ = Rcpp::as<NumericVector>(nnp);
+NumericMatrix priordata_ = Rcpp::as<NumericMatrix>(priordata);
+NumericVector priorweight_ = Rcpp::as<NumericVector>(priorweight);
 NumericMatrix thetaboot_ = Rcpp::as<NumericMatrix>(theta_boot);
 NumericVector bootmean0(1,0.0);
 NumericVector bootmean1(1,0.0);
@@ -834,7 +840,7 @@ bootmean0 = bootmean0/B;
 bootmean1 = bootmean1/B;
 
 while(go){	
-cover = _GPCYI_rcpp_parallel_yi(nn_, data_, thetaboot_, bootmean0, bootmean1, databoot_, alpha_, M_samp_, B_resamp_, w);
+cover = _GPCYI_rcpp_parallel_yi(nn_, data_, nnp_, priordata_, priorweight_, thetaboot_, bootmean0, bootmean1, databoot_, alpha_, M_samp_, B_resamp_, w);
 sumcover = 0.0;
 for(int s = 0; s<B; s++){sumcover = sumcover + cover(s);}
 diff = (sumcover/B) - (1.0-alpha_[0]);
@@ -849,7 +855,7 @@ if(((abs(diff)<= eps)&&(diff>=0)) || t>16) {
 // Final sample
 
 NumericVector M_final; M_final[0] = 2*M_samp_[0];
-finalsample = GibbsMCMC2(nn_, data_, thetaboot_, bootmean0, bootmean1, alpha_, M_final, w);
+finalsample = GibbsMCMC2(nn_, data_, nnp_, priordata_, priorweight_, thetaboot_, bootmean0, bootmean1, alpha_, M_final, w);
 	
 result = Rcpp::List::create(Rcpp::Named("w") = w,Rcpp::Named("t") = t,Rcpp::Named("diff") = diff, Rcpp::Named("list_cis") = finalsample);
 	

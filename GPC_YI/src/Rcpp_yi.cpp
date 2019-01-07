@@ -248,10 +248,10 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			F1_c0old(0)=F1_c0new(0);
 			F1_c1old(0)=F1_c1new(0);
 			F2_c1old(0)=F2_c1new(0);
-			F0_c0oldp(0)=F0_c0pnew(0);
-			F1_c0oldp(0)=F1_c0pnew(0);
-			F1_c1oldp(0)=F1_c1pnew(0);
-			F2_c1oldp(0)=F2_c1pnew(0);
+			F0_c0oldp(0)=F0_c0newp(0);
+			F1_c0oldp(0)=F1_c0newp(0);
+			F1_c1oldp(0)=F1_c1newp(0);
+			F2_c1oldp(0)=F2_c1newp(0);
 			sumsamp0(0)=sumsamp0(0)+theta0new(0);
 			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
 			sumsamp1(0)=sumsamp1(0)+theta1new(0);
@@ -351,6 +351,9 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	NumericVector n0(1,0.0);
 	NumericVector n1(1,0.0);
 	NumericVector n2(1,0.0);
+	NumericVector n0p(1,0.0);
+	NumericVector n1p(1,0.0);
+	NumericVector n2p(1,0.0);
 	NumericVector F0_c0old(1,0.0);
 	NumericVector F0_c0new(1,0.0);
 	NumericVector F1_c0old(1,0.0);

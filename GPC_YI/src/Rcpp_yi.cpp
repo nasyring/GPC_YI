@@ -36,6 +36,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	int n = int(nn[0]);
 	int np = int(nnp[0]);
 	double cov_ind = 0.0;
+	NumericVector YIboot(1,0.0);
    	NumericVector datamin(1,0.0);
 	NumericVector datamax(1,0.0);
    	NumericVector theta0old(1,0.0);
@@ -119,7 +120,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		if(datamax(0) < databoot(k,2*i+1)){
 			datamax(0) = databoot(k,2*i+1);	
 		}
+		YIboot(0) = YIboot+thetaboot(k);
 	}
+	YIboot(0) = YIboot(0)/n;
 	F0_c0old(0) = 	F0_c0old(0)/n0(0);
 	F1_c0old(0) = 	F1_c0old(0)/n1(0);
 	F1_c1old(0) = 	F1_c1old(0)/n1(0);
@@ -312,8 +315,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			u1[0]=postsamples1(j);
 		}
 	}
-
-	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
+	YIl[0] = YI[M*.025-1];
+	YIu[0] = YI[M*.975-1];
+	if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
 		cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
 	

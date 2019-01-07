@@ -27,7 +27,7 @@ inline double average(double val1, double val2) {
 
 // helper function for Gibbs sampling
 
-inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double> nnp, RVector<double> priordata, RVector<double> priorweight, RMatrix<double> thetaboot,
+inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double> nnp, RMatrix<double> priordata, RVector<double> priorweight, RMatrix<double> thetaboot,
 	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot,
 	RVector<double> alpha, RVector<double> M_samp, RVector<double> w, std::size_t i) {
    	
@@ -323,12 +323,13 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 }
 
 // [[Rcpp::export]]
-Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetaboot,
+Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
 	NumericVector bootmean0, NumericVector bootmean1, NumericVector alpha, NumericVector M_samp, NumericVector w) {
    	
 	List result;
 	int M = int(M_samp[0]);
 	int n = int(nn[0]);
+	int np = int(nnp[0]);
    	NumericVector datamin(1,0.0);
 	NumericVector datamax(1,0.0);
    	NumericVector theta0old(1,0.0);
@@ -358,6 +359,14 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	NumericVector F1_c1new(1,0.0);
 	NumericVector F2_c1old(1,0.0);
 	NumericVector F2_c1new(1,0.0);
+	NumericVector F0_c0oldp(1,0.0);
+	NumericVector F0_c0newp(1,0.0);
+	NumericVector F1_c0oldp(1,0.0);
+	NumericVector F1_c0newp(1,0.0);
+	NumericVector F1_c1oldp(1,0.0);
+	NumericVector F1_c1newp(1,0.0);
+	NumericVector F2_c1oldp(1,0.0);
+	NumericVector F2_c1newp(1,0.0);
 	NumericVector sumsamp0(1,0.0);
 	NumericVector sumsamp1(1,0.0);
 	NumericVector sumsamp0sq(1,0.0);
@@ -406,6 +415,34 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 	F1_c0old(0) = 	F1_c0old(0)/n1(0);
 	F1_c1old(0) = 	F1_c1old(0)/n1(0);
 	F2_c1old(0) = 	F2_c1old(0)/n2(0);
+	
+	for(int k=0; k<np; k++){
+		if(priordata(k,0)==1){
+			n0p(0) = n0p(0) + 1.0;
+			if(priordata(k,1)<=theta0old(0)){
+				F0_c0oldp(0) = 	F0_c0oldp(0)+1.0;
+			}	
+		}
+		else if(priordata(k,0)==2){
+			n1p(0) = n1p(0) + 1.0;
+			if(priordata(k,1)<=theta0old(0)){
+				F1_c0oldp(0) = 	F1_c0oldp(0)+1.0;
+			}
+			if(priordata(k,1)<=theta1old(0)){
+				F1_c1oldp(0) = 	F1_c1oldp(0)+1.0;
+			}	
+		}
+		else {
+			n2p(0) = n2p(0) + 1.0;
+			if(priordata(k,1)<=theta1old(0)){
+				F2_c1oldp(0) = 	F2_c1oldp(0)+1.0;
+			}
+		}
+	}
+	F0_c0oldp(0) = 	F0_c0oldp(0)/n0p(0);
+	F1_c0oldp(0) = 	F1_c0oldp(0)/n1p(0);
+	F1_c1oldp(0) = 	F1_c1oldp(0)/n1p(0);
+	F2_c1oldp(0) = 	F2_c1oldp(0)/n2p(0);
 	
 	for(int j=0; j<M; j++) {
 		if(j<=16){
@@ -463,8 +500,33 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 		F1_c0new(0) = 	F1_c0new(0)/n1(0);
 		F1_c1new(0) = 	F1_c1new(0)/n1(0);
 		F2_c1new(0) = 	F2_c1new(0)/n2(0);
+		
+		for(int k=0; k<np; k++){
+			if(priordata(k,0)==1){
+				if(priordata(k,1)<=theta0new(0)){
+					F0_c0newp(0) = 	F0_c0newp(0)+1.0;
+				}	
+			}
+			else if(priordata(k,0)==2){
+				if(priordata(k,1)<=theta0new(0)){
+					F1_c0newp(0) = 	F1_c0newp(0)+1.0;
+				}
+				if(priordata(k,1)<=theta1new(0)){
+					F1_c1newp(0) = 	F1_c1newp(0)+1.0;
+				}	
+			}
+			else {
+				if(priordata(k,1)<=theta1new(0)){
+					F2_c1newp(0) = 	F2_c1newp(0)+1.0;
+				}
+			}
+		}
+		F0_c0newp(0) = 	F0_c0newp(0)/n0p(0);
+		F1_c0newp(0) = 	F1_c0newp(0)/n1p(0);
+		F1_c1newp(0) = 	F1_c1newp(0)/n1p(0);
+		F2_c1newp(0) = 	F2_c1newp(0)/n2p(0);
 	
-		loglikdiff(0) = w[0]*n*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)));
+		loglikdiff(0) = w[0]*n*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)))  +  w[0]*priorweight[0]*np*((F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0))-(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0)));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
@@ -476,6 +538,10 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetab
 			F1_c0old(0)=F1_c0new(0);
 			F1_c1old(0)=F1_c1new(0);
 			F2_c1old(0)=F2_c1new(0);
+			F0_c0oldp(0)=F0_c0newp(0);
+			F1_c0oldp(0)=F1_c0newp(0);
+			F1_c1oldp(0)=F1_c1newp(0);
+			F2_c1oldp(0)=F2_c1newp(0);
 			sumsamp0(0)=sumsamp0(0)+theta0new(0);
 			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
 			sumsamp1(0)=sumsamp1(0)+theta1new(0);

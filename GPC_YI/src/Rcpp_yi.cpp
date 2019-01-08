@@ -387,6 +387,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	NumericVector YIu(1,0.0);
 	datamin(0) = data(0,1);
 	datamax(0) = data(0,1);	
+	NumericVector acc(1,0.0);
 	
 	
 	for(int k=0; k<n; k++){
@@ -453,8 +454,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	
 	for(int j=0; j<M; j++) {
 		if(j<=16){
-			theta0new(0) = R::rnorm(theta0old(0), .1);
-			theta1new(0) = R::rnorm(theta1old(0), .1);
+			theta0new(0) = R::rnorm(theta0old(0), .02);
+			theta1new(0) = R::rnorm(theta1old(0), .02);
 		}
 		else {
 			vv[0] = R::runif(0.0,1.0);
@@ -468,8 +469,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 				theta1new(0) = (theta1new(0)*sqrt(s2y(0)-(pow(sxy(0),2.0)*(1/s2x(0))))) + (theta0new(0)*sxy(0)*(1/sqrt(s2x(0))))+theta1old(0);
 			}
 			else {
-				theta0new(0) = R::rnorm(theta0old(0), 0.1);
-				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
+				theta0new(0) = R::rnorm(theta0old(0), 0.02);
+				theta1new(0) = R::rnorm(theta1old(0), 0.02);					
 			}
 		}
 		if(theta0new(0)>theta1new(0)){
@@ -555,6 +556,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
 			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
 			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
+			acc(0) = acc(0) + 1.0;
 		}
 		else {
 			postsamples0(j) = theta0old(0);
@@ -612,8 +614,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	}
 	YIl[0] = YI(0.025*M-1);
 	YIu[0] = YI(0.975*M-1);
-	
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin);
+	acc(0) = acc(0)/M;
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc);
 
 	return result;
 }

@@ -159,8 +159,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	
 	for(int j=0; j<M; j++) {
 		if(j<=16){
-			theta0new(0) = R::rnorm(theta0old(0), .1);
-			theta1new(0) = R::rnorm(theta1old(0), .1);
+			theta0new(0) = R::rnorm(theta0old(0), .02);
+			theta1new(0) = R::rnorm(theta1old(0), .02);
 		}
 		else {
 			vv[0] = R::runif(0.0,1.0);
@@ -174,8 +174,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 				theta1new(0) = (theta1new(0)*sqrt(s2y(0)-(pow(sxy(0),2.0)*(1/s2x(0))))) + (theta0new(0)*sxy(0)*(1/sqrt(s2x(0))))+theta1old(0);
 			}
 			else {
-				theta0new(0) = R::rnorm(theta0old(0), 0.1);
-				theta1new(0) = R::rnorm(theta1old(0), 0.1);					
+				theta0new(0) = R::rnorm(theta0old(0), 0.02);
+				theta1new(0) = R::rnorm(theta1old(0), 0.02);					
 			}
 		}
 		if(theta0new(0)>theta1new(0)){

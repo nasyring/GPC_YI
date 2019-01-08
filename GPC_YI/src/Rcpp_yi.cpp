@@ -350,8 +350,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
 	NumericVector u1(1,0.0);
-	theta0old = bootmean0;
-	theta1old = bootmean1;
+	theta0old(0) = bootmean0(0);
+	theta1old(0) = bootmean1(0);
 	NumericVector n0(1,0.0);
 	NumericVector n1(1,0.0);
 	NumericVector n2(1,0.0);

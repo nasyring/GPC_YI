@@ -1075,7 +1075,7 @@ NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericVect
 
 
 // [[Rcpp::export]]
-Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & nnp, SEXP & priordata, SEXP & priorweight, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {
+Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & nnp, SEXP & priordata, SEXP & priorweight, SEXP & theta_boot, SEXP & data_boot, SEXP & scheduleLen, SEXP & priorSched, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {
 
 RNGScope scp;
 Rcpp::Function _GPCYI_rcpp_parallel_yi("rcpp_parallel_yi");
@@ -1091,6 +1091,8 @@ NumericMatrix thetaboot_ = Rcpp::as<NumericMatrix>(theta_boot);
 NumericVector bootmean0(1,0.0);
 NumericVector bootmean1(1,0.0);
 NumericMatrix databoot_ = Rcpp::as<NumericMatrix>(data_boot);
+NumericVector scheduleLen_ = Rcpp::as<NumericVector>(scheduleLen);
+NumericMatrix priorSched_ = Rcpp::as<NumericMatrix>(priorSched);
 NumericVector alpha_ = Rcpp::as<NumericVector>(alpha);
 NumericVector M_samp_ = Rcpp::as<NumericVector>(M_samp);
 NumericVector B_resamp_ = Rcpp::as<NumericVector>(B_resamp);
@@ -1125,7 +1127,7 @@ if(((abs(diff)<= eps)&&(diff>=0)) || t>16) {
 // Final sample
 
 NumericVector M_final; M_final[0] = 2*M_samp_[0];
-finalsample = GibbsMCMC2(nn_, data_, nnp_, priordata_, priorweight_, thetaboot_, bootmean0, bootmean1, alpha_, M_final, w);
+finalsample = GibbsMCMC2(nn_, data_, nnp_, priordata_, priorweight_, thetaboot_, bootmean0, bootmean1, scheduleLen_, priorSched_, alpha_, M_final, w);
 	
 result = Rcpp::List::create(Rcpp::Named("w") = w,Rcpp::Named("t") = t,Rcpp::Named("diff") = diff, Rcpp::Named("list_cis") = finalsample);
 	

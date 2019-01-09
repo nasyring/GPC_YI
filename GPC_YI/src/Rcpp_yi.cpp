@@ -326,6 +326,270 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	
 }
 
+// Proposal Schedule as input
+// [[Rcpp::export]]
+Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
+	NumericVector bootmean0, NumericVector bootmean1, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector w) {
+   	
+	List result;
+	int M = int(M_samp[0]);
+	int n = int(nn[0]);
+	int sN = int(scheduleLen[0]);
+	int np = int(nnp[0]);
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
+   	NumericVector datamin(1,0.0);
+	NumericVector datamax(1,0.0);
+   	NumericVector theta0old(1,0.0);
+	NumericVector theta0new(1,0.0);
+	NumericVector theta1old(1,0.0);
+	NumericVector theta1new(1,0.0);
+	NumericVector loglikdiff(1,0.0);
+	NumericVector r(1,0.0);
+	NumericVector uu(1,0.0);
+	NumericVector vv(1,0.0);
+	NumericVector postsamples0(M,0.0);
+	NumericVector postsamples1(M,0.0);
+	NumericVector l0(1,0.0);
+	NumericVector l1(1,0.0);
+	NumericVector u0(1,0.0);
+	NumericVector u1(1,0.0);
+	theta0old(0) = bootmean0(0);
+	theta1old(0) = bootmean1(0);
+	NumericVector n0(1,0.0);
+	NumericVector n1(1,0.0);
+	NumericVector n2(1,0.0);
+	NumericVector n0p(1,0.0);
+	NumericVector n1p(1,0.0);
+	NumericVector n2p(1,0.0);
+	NumericVector F0_c0old(1,0.0);
+	NumericVector F0_c0new(1,0.0);
+	NumericVector F1_c0old(1,0.0);
+	NumericVector F1_c0new(1,0.0);
+	NumericVector F1_c1old(1,0.0);
+	NumericVector F1_c1new(1,0.0);
+	NumericVector F2_c1old(1,0.0);
+	NumericVector F2_c1new(1,0.0);
+	NumericVector F0_c0oldp(1,0.0);
+	NumericVector F0_c0newp(1,0.0);
+	NumericVector F1_c0oldp(1,0.0);
+	NumericVector F1_c0newp(1,0.0);
+	NumericVector F1_c1oldp(1,0.0);
+	NumericVector F1_c1newp(1,0.0);
+	NumericVector F2_c1oldp(1,0.0);
+	NumericVector F2_c1newp(1,0.0);
+	NumericVector YI(M,0.0);
+	NumericVector YIl(1,0.0);
+	NumericVector YIu(1,0.0);
+	datamin(0) = data(0,1);
+	datamax(0) = data(0,1);	
+	NumericVector acc(1,0.0);
+	
+	for(int j=0; j<sN; j++){
+		if(w(0)<=priorSched(j,0)){
+			prop0(0) = priorSched(j,1);	
+		}
+		if(w(0)<=priorSched(j,2)){
+			prop1(0) = priorSched(j,3);	
+		}		
+	}
+	
+	
+	for(int k=0; k<n; k++){
+		if(data(k,0)==1){
+			n0(0) = n0(0) + 1.0;
+			if(data(k,1)<=theta0old(0)){
+				F0_c0old(0) = 	F0_c0old(0)+1.0;
+			}	
+		}
+		else if(data(k,0)==2){
+			n1(0) = n1(0) + 1.0;
+			if(data(k,1)<=theta0old(0)){
+				F1_c0old(0) = 	F1_c0old(0)+1.0;
+			}
+			if(data(k,1)<=theta1old(0)){
+				F1_c1old(0) = 	F1_c1old(0)+1.0;
+			}	
+		}
+		else {
+			n2(0) = n2(0) + 1.0;
+			if(data(k,1)<=theta1old(0)){
+				F2_c1old(0) = 	F2_c1old(0)+1.0;
+			}
+		}
+		if(datamin(0) > data(k,1)){
+			datamin(0) = data(k,1);	
+		}
+		if(datamax(0) < data(k,1)){
+			datamax(0) = data(k,1);	
+		}
+	}
+	F0_c0old(0) = 	F0_c0old(0)/n0(0);
+	F1_c0old(0) = 	F1_c0old(0)/n1(0);
+	F1_c1old(0) = 	F1_c1old(0)/n1(0);
+	F2_c1old(0) = 	F2_c1old(0)/n2(0);
+	if(priorweight[0]>0.0){
+	for(int k=0; k<np; k++){
+		if(priordata(k,0)==1){
+			n0p(0) = n0p(0) + 1.0;
+			if(priordata(k,1)<=theta0old(0)){
+				F0_c0oldp(0) = 	F0_c0oldp(0)+1.0;
+			}	
+		}
+		else if(priordata(k,0)==2){
+			n1p(0) = n1p(0) + 1.0;
+			if(priordata(k,1)<=theta0old(0)){
+				F1_c0oldp(0) = 	F1_c0oldp(0)+1.0;
+			}
+			if(priordata(k,1)<=theta1old(0)){
+				F1_c1oldp(0) = 	F1_c1oldp(0)+1.0;
+			}	
+		}
+		else {
+			n2p(0) = n2p(0) + 1.0;
+			if(priordata(k,1)<=theta1old(0)){
+				F2_c1oldp(0) = 	F2_c1oldp(0)+1.0;
+			}
+		}
+	}
+	F0_c0oldp(0) = 	F0_c0oldp(0)/n0p(0);
+	F1_c0oldp(0) = 	F1_c0oldp(0)/n1p(0);
+	F1_c1oldp(0) = 	F1_c1oldp(0)/n1p(0);
+	F2_c1oldp(0) = 	F2_c1oldp(0)/n2p(0);}
+	
+	for(int j=0; j<M; j++) {
+		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
+		
+		loglikdiff(0) = 0.0;
+		for(int k=0; k<n; k++){
+			if(data(k,0)==1){
+				if(data(k,1)<=theta0new(0)){
+					F0_c0new(0) = 	F0_c0new(0)+1.0;
+				}	
+			}
+			else if(data(k,0)==2){
+				if(data(k,1)<=theta0new(0)){
+					F1_c0new(0) = 	F1_c0new(0)+1.0;
+				}
+				if(data(k,1)<=theta1new(0)){
+					F1_c1new(0) = 	F1_c1new(0)+1.0;
+				}	
+			}
+			else {
+				if(data(k,1)<=theta1new(0)){
+					F2_c1new(0) = 	F2_c1new(0)+1.0;
+				}
+			}
+		}
+		F0_c0new(0) = 	F0_c0new(0)/n0(0);
+		F1_c0new(0) = 	F1_c0new(0)/n1(0);
+		F1_c1new(0) = 	F1_c1new(0)/n1(0);
+		F2_c1new(0) = 	F2_c1new(0)/n2(0);
+		if(priorweight[0]>0.0){
+		for(int k=0; k<np; k++){
+			if(priordata(k,0)==1){
+				if(priordata(k,1)<=theta0new(0)){
+					F0_c0newp(0) = 	F0_c0newp(0)+1.0;
+				}	
+			}
+			else if(priordata(k,0)==2){
+				if(priordata(k,1)<=theta0new(0)){
+					F1_c0newp(0) = 	F1_c0newp(0)+1.0;
+				}
+				if(priordata(k,1)<=theta1new(0)){
+					F1_c1newp(0) = 	F1_c1newp(0)+1.0;
+				}	
+			}
+			else {
+				if(priordata(k,1)<=theta1new(0)){
+					F2_c1newp(0) = 	F2_c1newp(0)+1.0;
+				}
+			}
+		}
+		F0_c0newp(0) = 	F0_c0newp(0)/n0p(0);
+		F1_c0newp(0) = 	F1_c0newp(0)/n1p(0);
+		F1_c1newp(0) = 	F1_c1newp(0)/n1p(0);
+		F2_c1newp(0) = 	F2_c1newp(0)/n2p(0);}
+	
+		loglikdiff(0) = w[0]*n*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)))  +  w[0]*priorweight[0]*np*((F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0))-(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0)));
+		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
+		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff(0)) {
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			F0_c0old(0)=F0_c0new(0);
+			F1_c0old(0)=F1_c0new(0);
+			F1_c1old(0)=F1_c1new(0);
+			F2_c1old(0)=F2_c1new(0);
+			F0_c0oldp(0)=F0_c0newp(0);
+			F1_c0oldp(0)=F1_c0newp(0);
+			F1_c1oldp(0)=F1_c1newp(0);
+			F2_c1oldp(0)=F2_c1newp(0);
+			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
+			acc(0) = acc(0) + 1.0;
+		}
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
+		}
+	}
+	/*
+	double tempYI;
+	double temppost0;
+	double temppost1;
+	bool swapped;	
+        for (int i = 0; i < M-1; i++){ 
+		 swapped = false; 
+       		 for (int j = 0; j < M-i-1; j++){  
+           		 if (YI(j) > YI(j+1)){ 
+				 swapped = true;
+				 tempYI = YI(j);
+				 YI(j) = YI(j+1);
+				 YI(j+1) = tempYI;
+				 temppost0 = postsamples0(j);
+				 postsamples0(j) = postsamples0(j+1);
+				 postsamples0(j+1) = temppost0;				 
+				 temppost1 = postsamples1(j);
+				 postsamples1(j) = postsamples1(j+1);
+				 postsamples1(j+1) = temppost1;
+			 }
+		 }
+		 if (swapped == false) 
+			break;
+        }
+			
+	l0[0] = 100000;
+	u0[0] = -100000;
+	l1[0] = 100000;
+	u1[0] = -100000;
+	for(int i = (0.05*M-1); i<M; i++){
+		if(l0[0]>postsamples0(i)){
+			l0[0]=postsamples0(i);
+		}
+		if(u0[0]<postsamples0(i)){
+			u0[0]=postsamples0(i);
+		}
+		if(l1[0]>postsamples1(i)){
+			l1[0]=postsamples1(i);
+		}
+		if(u1[0]<postsamples1(i)){
+			u1[0]=postsamples1(i);
+		}
+	}*/
+	YIl[0] = YI(0.025*M-1);
+	YIu[0] = YI(0.975*M-1);
+	acc(0) = acc(0)/M;
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1);
+
+	return result;
+}
+
+
+/* adaptive proposal
 // [[Rcpp::export]]
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
 	NumericVector bootmean0, NumericVector bootmean1, NumericVector alpha, NumericVector M_samp, NumericVector w) {
@@ -569,7 +833,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
-	/*
+	
 	double tempYI;
 	double temppost0;
 	double temppost1;
@@ -613,13 +877,13 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		}
 	}
 	YIl[0] = YI(0.025*M-1);
-	YIu[0] = YI(0.975*M-1);*/
+	YIu[0] = YI(0.975*M-1);
 	acc(0) = acc(0)/M;
 	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1);
 
 	return result;
 }
-
+*/
 /* non-adaptive version
 // [[Rcpp::export]]
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericMatrix thetaboot,

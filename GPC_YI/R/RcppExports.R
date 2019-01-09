@@ -3,7 +3,7 @@
 
 
 
-GPCYI_yi_parallel <- function(nn, data, nnp, priordata, priorweight, theta_boot, data_boot, alpha, M_samp, B_resamp) {
+GPCYI_yi_parallel <- function(nn, data, nnp, priordata, priorweight, theta_boot, data_boot, scheduleLen, priorSched, alpha, M_samp, B_resamp) {
     .Call(`GPCYI_GPCYI_yi_parallel`,  nn, data, nnp, priordata, priorweight, theta_boot, data_boot, alpha, M_samp, B_resamp)
 }
 

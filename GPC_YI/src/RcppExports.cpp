@@ -10,8 +10,8 @@ using namespace std;
 
 
 // GPC_yi_parallel
-Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & nnp, SEXP & priordata, SEXP & priorweight, SEXP & theta_boot, SEXP & data_boot, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp);
-RcppExport SEXP GPCYI_GPCYI_yi_parallel(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP theta_bootSEXP, SEXP data_bootSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP){
+Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & nnp, SEXP & priordata, SEXP & priorweight, SEXP & theta_boot, SEXP & data_boot, SEXP & scheduleLen, SEXP & priorSched, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp);
+RcppExport SEXP GPCYI_GPCYI_yi_parallel(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP theta_bootSEXP, SEXP data_bootSEXP, SEXP scheduleLenSEXP, SEXP priorSchedSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP){
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -22,10 +22,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP & >::type priorweight(priorweightSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type theta_boot(theta_bootSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type data_boot(data_bootSEXP);
+    Rcpp::traits::input_parameter< SEXP & >::type scheduleLen(scheduleLenSEXP);
+    Rcpp::traits::input_parameter< SEXP & >::type priorSched(priorSchedSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type M_samp(M_sampSEXP);
     Rcpp::traits::input_parameter< SEXP & >::type B_resamp(B_resampSEXP);
-    __result = Rcpp::wrap(GPCYI_yi_parallel(nn, data, nnp, priordata, priorweight, theta_boot, data_boot, alpha, M_samp, B_resamp));
+    __result = Rcpp::wrap(GPCYI_yi_parallel(nn, data, nnp, priordata, priorweight, theta_boot, data_boot, scheduleLen, priorSched, alpha, M_samp, B_resamp));
     return __result;
 END_RCPP
 }
@@ -91,7 +93,7 @@ END_RCPP
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 10},
+    {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 12},
     {"GPCYI_rcpp_parallel_yi", (DL_FUNC) &GPCYI_rcpp_parallel_yi, 13},
     {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 13},
     {NULL, NULL, 0}

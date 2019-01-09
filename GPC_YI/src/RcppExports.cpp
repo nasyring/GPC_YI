@@ -64,7 +64,7 @@ END_RCPP
 
 
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
-	NumericVector bootmean0, NumericVector bootmean1, NumericVector alpha, NumericVector M_samp, NumericVector w);
+	NumericVector bootmean0, NumericVector bootmean1, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector w);
 RcppExport SEXP GPCYI_GibbsMCMC2(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP wSEXP){
 BEGIN_RCPP
     Rcpp::RObject __result;
@@ -77,10 +77,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type thetaboot(thetabootSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scheduleLen(scheduleLenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type priorSched(priorSchedSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
-    __result = Rcpp::wrap(GibbsMCMC2(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, alpha, M_samp, w));
+    __result = Rcpp::wrap(GibbsMCMC2(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, scheduleLen, priorSched, alpha, M_samp, w));
     return __result;
 END_RCPP
 }
@@ -91,7 +93,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 10},
     {"GPCYI_rcpp_parallel_yi", (DL_FUNC) &GPCYI_rcpp_parallel_yi, 13},
-    {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 11},
+    {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 13},
     {NULL, NULL, 0}
 };
 

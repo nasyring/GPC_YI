@@ -87,10 +87,10 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	datamax(0) = databoot(0,2*i+1);
 	
 	for(int j=0; j<sN; j++){
-		if(w(0)<=priorSched(j,0)){
+		if(w[0]<=priorSched(j,0)){
 			prop0(0) = priorSched(j,1);	
 		}
-		if(w(0)<=priorSched(j,2)){
+		if(w[0]<=priorSched(j,2)){
 			prop1(0) = priorSched(j,3);	
 		}		
 	}

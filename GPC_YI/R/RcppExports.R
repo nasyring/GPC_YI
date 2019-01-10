@@ -4,11 +4,11 @@
 
 
 GPCYI_yi_parallel <- function(nn, data, nnp, priordata, priorweight, theta_boot, data_boot, scheduleLen, priorSched, alpha, M_samp, B_resamp) {
-    .Call(`GPCYI_GPCYI_yi_parallel`,  nn, data, nnp, priordata, priorweight, theta_boot, data_boot, alpha, M_samp, B_resamp)
+    .Call(`GPCYI_GPCYI_yi_parallel`,  nn, data, nnp, priordata, priorweight, theta_boot, data_boot, scheduleLen, priorSched, alpha, M_samp, B_resamp)
 }
 
-rcpp_parallel_yi <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w){
-    .Call(`GPCYI_rcpp_parallel_yi`,  nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w)   
+rcpp_parallel_yi <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, scheduleLen, priorSched, alpha, M_samp, B_resamp, w){
+    .Call(`GPCYI_rcpp_parallel_yi`,  nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, scheduleLen, priorSched, alpha, M_samp, B_resamp, w)   
 }
 
 GibbsMCMC2 <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, scheduleLen, priorSched, alpha, M_samp, w){

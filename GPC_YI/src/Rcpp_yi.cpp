@@ -527,7 +527,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
-	/*
+
 	double tempYI;
 	double temppost0;
 	double temppost1;
@@ -569,7 +569,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		if(u1[0]<postsamples1(i)){
 			u1[0]=postsamples1(i);
 		}
-	}*/
+	}
 	YIl[0] = YI(0.025*M-1);
 	YIu[0] = YI(0.975*M-1);
 	acc(0) = acc(0)/M;

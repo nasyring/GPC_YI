@@ -28,13 +28,16 @@ inline double average(double val1, double val2) {
 // helper function for Gibbs sampling
 
 inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double> nnp, RMatrix<double> priordata, RVector<double> priorweight, RMatrix<double> thetaboot,
-	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot,
+	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot, RVector<double> scheduleLen, RMatrix<double> priorSched,
 	RVector<double> alpha, RVector<double> M_samp, RVector<double> w, std::size_t i) {
    	
 
 	int M = int(M_samp[0]);
 	int n = int(nn[0]);
 	int np = int(nnp[0]);
+	int sN = int(scheduleLen[0]);
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
 	double cov_ind = 0.0;
 	NumericVector YIboot(1,0.0);
    	NumericVector datamin(1,0.0);
@@ -75,14 +78,6 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	NumericVector F1_c1newp(1,0.0);
 	NumericVector F2_c1oldp(1,0.0);
 	NumericVector F2_c1newp(1,0.0);
-	NumericVector sumsamp0(1,0.0);
-	NumericVector sumsamp1(1,0.0);
-	NumericVector sumsamp0sq(1,0.0);
-	NumericVector sumsamp1sq(1,0.0);
-	NumericVector sumsamp01(1,0.0);
-	NumericVector s2x(1,0.0);
-	NumericVector s2y(1,0.0);
-	NumericVector sxy(1,0.0);
 	theta0old(0) = thetaboot(i,0);
 	theta1old(0) = thetaboot(i,1);
 	NumericVector YI(M,0.0);
@@ -90,6 +85,15 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	NumericVector YIu(1,0.0);
 	datamin(0) = databoot(0,2*i+1);
 	datamax(0) = databoot(0,2*i+1);
+	
+	for(int j=0; j<sN; j++){
+		if(w(0)<=priorSched(j,0)){
+			prop0(0) = priorSched(j,1);	
+		}
+		if(w(0)<=priorSched(j,2)){
+			prop1(0) = priorSched(j,3);	
+		}		
+	}
 
 	
 	for(int k=0; k<n; k++){
@@ -158,26 +162,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 
 	
 	for(int j=0; j<M; j++) {
-		if(j<=16){
-			theta0new(0) = R::rnorm(theta0old(0), .02);
-			theta1new(0) = R::rnorm(theta1old(0), .02);
-		}
-		else {
-			vv[0] = R::runif(0.0,1.0);
-			if(vv[0]<=0.95){
-				theta0new(0) = R::rnorm(0.0, 1.0);
-				theta1new(0) = R::rnorm(0.0, 1.0);
-				s2x(0) = (2.38*(2.38/2.0))*((sumsamp0sq(0)/j) - pow((sumsamp0(0)/j),2.0));
-				s2y(0) = (2.38*(2.38/2.0))*((sumsamp1sq(0)/j) - pow((sumsamp1(0)/j),2.0));
-				sxy(0) = (2.38*(2.38/2.0))*((sumsamp01(0)/j) - (sumsamp0(0)*sumsamp1(0)/(j*j)));
-				theta0new(0) = (theta0new(0)*sqrt(s2x(0)))+theta0old(0);
-				theta1new(0) = (theta1new(0)*sqrt(s2y(0)-(pow(sxy(0),2.0)*(1/s2x(0))))) + (theta0new(0)*sxy(0)*(1/sqrt(s2x(0))))+theta1old(0);
-			}
-			else {
-				theta0new(0) = R::rnorm(theta0old(0), 0.02);
-				theta1new(0) = R::rnorm(theta1old(0), 0.02);					
-			}
-		}
+		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
+	
 		if(theta0new(0)>theta1new(0)){
 			theta0new(0) = theta0old(0);
 			theta1new(0) = theta1old(0);			
@@ -188,6 +175,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		if(theta1new(0)>datamax(0)){
 			theta1new(0) = theta1old(0);			
 		}
+		
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			if(databoot(k,2*i)==1){
@@ -460,6 +448,18 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	for(int j=0; j<M; j++) {
 		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
 		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
+		
+			
+		if(theta0new(0)>theta1new(0)){
+			theta0new(0) = theta0old(0);
+			theta1new(0) = theta1old(0);			
+		}
+		if(theta0new(0)<datamin(0)){
+			theta0new(0) = theta0old(0);			
+		}
+		if(theta1new(0)>datamax(0)){
+			theta1new(0) = theta1old(0);			
+		}
 		
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
@@ -1030,6 +1030,8 @@ struct GPCYI_yi_mcmc_parallel : public Worker {
 	const RVector<double> bootmean0;
 	const RVector<double> bootmean1;
 	const RMatrix<double> databoot;
+	const RVector<double> scheduleLen;
+	const RMatrix<double> priorSched;
 	const RVector<double> alpha;
 	const RVector<double> M_samp;
 	const RVector<double> B_resamp;
@@ -1038,22 +1040,22 @@ struct GPCYI_yi_mcmc_parallel : public Worker {
 
    // initialize with source and destination
    GPCYI_yi_mcmc_parallel(const NumericVector nn, const NumericMatrix data, const NumericVector nnp, const NumericMatrix priordata, const NumericVector priorweight, const NumericMatrix thetaboot,
-	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot,
+	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot, const NumericVector scheduleLen, const NumericMatrix priorSched,
 	const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp,
 	const NumericVector w, NumericVector cover) 
-			: nn(nn), data(data), nnp(nnp), priordata(priordata), priorweight(priorweight),  thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot(databoot), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
+			: nn(nn), data(data), nnp(nnp), priordata(priordata), priorweight(priorweight),  thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot(databoot), scheduleLen(scheduleLen), priorSched(priorSched), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
 
    // operator
 void operator()(std::size_t begin, std::size_t end) {
 		for (std::size_t i = begin; i < end; i++) {
-			cover[i] = GibbsMCMC(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, w, i);	
+			cover[i] = GibbsMCMC(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, scheduleLen, priorSched, alpha, M_samp, w, i);	
 		}
 	}
 };
 
 // [[Rcpp::export]]
 NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot, NumericVector bootmean0,
-	NumericVector bootmean1, NumericMatrix databoot, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
+	NumericVector bootmean1, NumericMatrix databoot, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
 	NumericVector w) {
 	
    int B = int(B_resamp[0]);
@@ -1061,7 +1063,7 @@ NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericVect
    NumericVector cover(B,2.0); 
 
    // create the worker
-   GPCYI_yi_mcmc_parallel gpcWorker(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, alpha, M_samp, B_resamp, w, cover);
+   GPCYI_yi_mcmc_parallel gpcWorker(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, scheduleLen, priorSched, alpha, M_samp, B_resamp, w, cover);
      
    // call it with parallelFor
    

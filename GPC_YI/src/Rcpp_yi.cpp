@@ -243,21 +243,11 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			F1_c0oldp(0)=F1_c0newp(0);
 			F1_c1oldp(0)=F1_c1newp(0);
 			F2_c1oldp(0)=F2_c1newp(0);
-			sumsamp0(0)=sumsamp0(0)+theta0new(0);
-			sumsamp0sq(0)=sumsamp0sq(0)+theta0new(0)*theta0new(0);
-			sumsamp1(0)=sumsamp1(0)+theta1new(0);
-			sumsamp1sq(0)=sumsamp1sq(0)+theta1new(0)*theta1new(0);
-			sumsamp01(0)=sumsamp01(0)+theta1new(0)*theta0new(0);
 			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
 		}
 		else {
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
-			sumsamp0(0)=sumsamp0(0)+theta0old(0);
-			sumsamp0sq(0)=sumsamp0sq(0)+theta0old(0)*theta0old(0);
-			sumsamp1(0)=sumsamp1(0)+theta1old(0);
-			sumsamp1sq(0)=sumsamp1sq(0)+theta1old(0)*theta1old(0);
-			sumsamp01(0)=sumsamp01(0)+theta1old(0)*theta0old(0);
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}

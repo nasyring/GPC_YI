@@ -251,7 +251,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
-
+/*
 	double tempYI;
 	double temppost0;
 	double temppost1;
@@ -293,6 +293,14 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			u1[0]=postsamples1(j);
 		}
 	}
+	*/
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
+	std::sort(YI.begin(), YI.end());
+	l0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.025-1);
+	l1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.025-1);
 	YIl[0] = YI[M*.025-1];
 	YIu[0] = YI[M*.975-1];
 	//if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){

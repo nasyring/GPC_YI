@@ -298,9 +298,9 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	std::sort(postsamples1.begin(), postsamples1.end());
 	std::sort(YI.begin(), YI.end());
 	l0[0] = postsamples0(M*.025-1);
-	u0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.975-1);
 	l1[0] = postsamples1(M*.025-1);
-	u1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.975-1);
 	YIl[0] = YI[M*.025-1];
 	YIu[0] = YI[M*.975-1];
 	//if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){

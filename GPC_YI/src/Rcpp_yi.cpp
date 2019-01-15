@@ -52,6 +52,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	NumericVector vv(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
+	NumericVector logpost(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -233,6 +234,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
 			postsamples1(j) = theta1new(0);
+			logpost(j) = w[0]*n*(F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))+w[0]*priorweight[0]*np*(F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0));
 			theta0old(0) = theta0new(0);
 			theta1old(0) = theta1new(0);
 			F0_c0old(0)=F0_c0new(0);
@@ -248,10 +250,12 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		else {
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
+			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
 /*
+	double templogpost;
 	double tempYI;
 	double temppost0;
 	double temppost1;
@@ -259,8 +263,11 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
         for (int j = 0; j < M-1; j++){ 
 		 swapped = false; 
        		 for (int k = 0; k < M-j-1; k++){  
-           		 if (YI(k) > YI(k+1)){ 
+           		 if (logpost(k) > logpost(k+1)){ 
 				 swapped = true;
+				 templogpost = logpost(k);
+				 logpost(k) = logpost(k+1);
+				 logpost(k+1) = templogpost;
 				 tempYI = YI(k);
 				 YI(k) = YI(k+1);
 				 YI(k+1) = tempYI;
@@ -338,6 +345,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	NumericVector vv(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
+	NumericVector logpost(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -518,6 +526,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
 			postsamples1(j) = theta1new(0);
+			logpost(j) = w[0]*n*(F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))+w[0]*priorweight[0]*np*(F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0));
 			theta0old(0) = theta0new(0);
 			theta1old(0) = theta1new(0);
 			F0_c0old(0)=F0_c0new(0);
@@ -534,28 +543,33 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		else {
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
+			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
 
+	double templogpost;
 	double tempYI;
 	double temppost0;
 	double temppost1;
 	bool swapped;	
-        for (int i = 0; i < M-1; i++){ 
+        for (int j = 0; j < M-1; j++){ 
 		 swapped = false; 
-       		 for (int j = 0; j < M-i-1; j++){  
-           		 if (YI(j) > YI(j+1)){ 
+       		 for (int k = 0; k < M-j-1; k++){  
+           		 if (logpost(k) > logpost(k+1)){ 
 				 swapped = true;
-				 tempYI = YI(j);
-				 YI(j) = YI(j+1);
-				 YI(j+1) = tempYI;
-				 temppost0 = postsamples0(j);
-				 postsamples0(j) = postsamples0(j+1);
-				 postsamples0(j+1) = temppost0;				 
-				 temppost1 = postsamples1(j);
-				 postsamples1(j) = postsamples1(j+1);
-				 postsamples1(j+1) = temppost1;
+				 templogpost = logpost(k);
+				 logpost(k) = logpost(k+1);
+				 logpost(k+1) = templogpost;
+				 tempYI = YI(k);
+				 YI(k) = YI(k+1);
+				 YI(k+1) = tempYI;
+				 temppost0 = postsamples0(k);
+				 postsamples0(k) = postsamples0(k+1);
+				 postsamples0(k+1) = temppost0;				 
+				 temppost1 = postsamples1(k);
+				 postsamples1(k) = postsamples1(k+1);
+				 postsamples1(k+1) = temppost1;
 			 }
 		 }
 		 if (swapped == false) 
@@ -566,6 +580,8 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	u0[0] = -100000;
 	l1[0] = 100000;
 	u1[0] = -100000;
+	YIl[0] = 100000;
+	YIu[0] = -100000;
 	for(int i = (0.05*M-1); i<M; i++){
 		if(l0[0]>postsamples0(i)){
 			l0[0]=postsamples0(i);
@@ -579,9 +595,14 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		if(u1[0]<postsamples1(i)){
 			u1[0]=postsamples1(i);
 		}
+		if(YIl[0]>YI(i)){
+			YIl[0]=YI(i);
+		}
+		if(YIu[0]<YI(i)){
+			YIu[0]=YI(i);
+		}
 	}
-	YIl[0] = YI(0.025*M-1);
-	YIu[0] = YI(0.975*M-1);
+
 	acc(0) = acc(0)/M;
 	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1);
 

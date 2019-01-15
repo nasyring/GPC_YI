@@ -466,17 +466,13 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
 		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
 		
-			
-		if(theta0new(0)>theta1new(0)){
-			theta0new(0) = theta0old(0);
-			theta1new(0) = theta1old(0);			
-		}
-		if(theta0new(0)<datamin(0)){
-			theta0new(0) = theta0old(0);			
-		}
-		if(theta1new(0)>datamax(0)){
-			theta1new(0) = theta1old(0);			
-		}
+		
+		if( (theta0new(0)>theta1new(0)) ||  (theta0new(0)<datamin(0)) || (theta1new(0)>datamax(0))   ){
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
+		}else {
 		
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
@@ -554,6 +550,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 			postsamples1(j) = theta1old(0);
 			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
+		}
 		}
 	}
 

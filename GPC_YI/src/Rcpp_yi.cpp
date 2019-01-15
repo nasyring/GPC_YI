@@ -319,12 +319,12 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	u1[0] = postsamples1(M*.975-1);
 	YIl[0] = YI[M*.025-1];
 	YIu[0] = YI[M*.975-1];*/
-	if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
-			cov_ind = 1.0;
-	} else {cov_ind = 0.0;}
-	/*if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
+	/*if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
 			cov_ind = 1.0;
 	} else {cov_ind = 0.0;}*/
+	if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
+			cov_ind = 1.0;
+	} else {cov_ind = 0.0;}
 	return cov_ind;
 
 	

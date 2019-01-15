@@ -254,7 +254,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
-/*
+
 	double templogpost;
 	double tempYI;
 	double temppost0;
@@ -282,25 +282,34 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		 if (swapped == false) 
 			break;
         }
+			
 	l0[0] = 100000;
 	u0[0] = -100000;
 	l1[0] = 100000;
 	u1[0] = -100000;
-	for(int j = (0.05*M-1); j<M; j++){
-		if(l0[0]>postsamples0(j)){
-			l0[0]=postsamples0(j);
+	YIl[0] = 100000;
+	YIu[0] = -100000;
+	for(int i = (0.05*M-1); i<M; i++){
+		if(l0[0]>postsamples0(i)){
+			l0[0]=postsamples0(i);
 		}
-		if(u0[0]<postsamples0(j)){
-			u0[0]=postsamples0(j);
+		if(u0[0]<postsamples0(i)){
+			u0[0]=postsamples0(i);
 		}
-		if(l1[0]>postsamples1(j)){
-			l1[0]=postsamples1(j);
+		if(l1[0]>postsamples1(i)){
+			l1[0]=postsamples1(i);
 		}
-		if(u1[0]<postsamples1(j)){
-			u1[0]=postsamples1(j);
+		if(u1[0]<postsamples1(i)){
+			u1[0]=postsamples1(i);
+		}
+		if(YIl[0]>YI(i)){
+			YIl[0]=YI(i);
+		}
+		if(YIu[0]<YI(i)){
+			YIu[0]=YI(i);
 		}
 	}
-	*/
+	/*
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());
 	std::sort(YI.begin(), YI.end());
@@ -309,13 +318,13 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	l1[0] = postsamples1(M*.025-1);
 	u1[0] = postsamples1(M*.975-1);
 	YIl[0] = YI[M*.025-1];
-	YIu[0] = YI[M*.975-1];
-	//if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
-	//		cov_ind = 1.0;
-	//} else {cov_ind = 0.0;}
-	if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
+	YIu[0] = YI[M*.975-1];*/
+	if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
 			cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
+	/*if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
+			cov_ind = 1.0;
+	} else {cov_ind = 0.0;}*/
 	return cov_ind;
 
 	
@@ -346,9 +355,6 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
 	NumericVector logpost(M,0.0);
-	NumericVector testpostsamples0(M,0.0);
-	NumericVector testpostsamples1(M,0.0);
-	NumericVector testlogpost(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -378,7 +384,6 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	NumericVector F2_c1oldp(1,0.0);
 	NumericVector F2_c1newp(1,0.0);
 	NumericVector YI(M,0.0);
-	NumericVector testYI(M,0.0);
 	NumericVector YIl(1,0.0);
 	NumericVector YIu(1,0.0);
 	datamin(0) = data(0,1);
@@ -552,10 +557,6 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 		}
 	}
 
-	testpostsamples0 = postsamples0;
-	testpostsamples1 = postsamples1;
-	testlogpost = logpost;
-	testYI = YI;
 	double templogpost;
 	double tempYI;
 	double temppost0;
@@ -612,7 +613,7 @@ Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, N
 	}
 
 	acc(0) = acc(0)/M;
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost, Rcpp::Named("testsamples0") = testpostsamples0, Rcpp::Named("testsamples1") = testpostsamples1, Rcpp::Named("testpost") = testlogpost, Rcpp::Named("testYI") = testYI);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
 
 	return result;
 }

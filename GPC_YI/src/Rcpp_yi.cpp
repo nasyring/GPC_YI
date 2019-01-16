@@ -254,7 +254,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
 		}
 	}
-
+/*
 	double templogpost;
 	double tempYI;
 	double temppost0;
@@ -308,8 +308,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 		if(YIu[0]<YI(i)){
 			YIu[0]=YI(i);
 		}
-	}
-	/*
+	}*/
+	
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());
 	std::sort(YI.begin(), YI.end());

@@ -1001,32 +1001,32 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 	
 	int k = 0;
 	while(k < kdeN){
-		if(theta0old(0)<=kdecdfboot1(k,2*i)){
-			F0_c0old(0) = kdecdfboot1(k,2*i+1);
+		if(theta0old(0)<=kdecdfboot1(k,0)){
+			F0_c0old(0) = kdecdfboot1(k,1);
 			break;
 		}	
 		k = k + 1;
 	}
 	k = 0;
 	while(k < kdeN){
-		if(theta0old(0)<=kdecdfboot2(k,2*i)){
-			F1_c0old(0) = kdecdfboot2(k,2*i+1);
+		if(theta0old(0)<=kdecdfboot2(k,0)){
+			F1_c0old(0) = kdecdfboot2(k,1);
 			break;
 		}
 		k = k + 1;
 	}
 	k = 0;
 	while(k < kdeN){
-		if(theta1old(0)<=kdecdfboot2(k,2*i)){
-			F1_c1old(0) = kdecdfboot2(k,2*i+1);
+		if(theta1old(0)<=kdecdfboot2(k,0)){
+			F1_c1old(0) = kdecdfboot2(k,1);
 			break;
 		}
 		k = k + 1;
 	}
 	k = 0;
 	while(k < kdeN){
-		if(theta1old(0)<=kdecdfboot3(k,2*i)){
-			F2_c1old(0) = kdecdfboot3(k,2*i+1);
+		if(theta1old(0)<=kdecdfboot3(k,0)){
+			F2_c1old(0) = kdecdfboot3(k,1);
 			break;
 		}
 		k = k + 1;
@@ -1036,32 +1036,32 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 	if(priorweight>0.0){
 		k = 0;
 		while(k < kdeN){
-			if(theta0old(0)<=kdecdfboot1p(k,2*i)){
-				F0_c0oldp(0) = kdecdfboot1p(k,2*i+1);
+			if(theta0old(0)<=kdecdfboot1p(k,0)){
+				F0_c0oldp(0) = kdecdfboot1p(k,1);
 				break;
 			}
 			k = k + 1;
 		}
 		k = 0;
 		while(k < kdeN){
-			if(theta0old(0)<=kdecdfboot2p(k,2*i)){
-				F1_c0oldp(0) = kdecdfboot2p(k,2*i+1);
+			if(theta0old(0)<=kdecdfboot2p(k,0)){
+				F1_c0oldp(0) = kdecdfboot2p(k,1);
 				break;
 			}	
 			k = k + 1;
 		}
 		k = 0;
 		while(k < kdeN){
-			if(theta1old(0)<=kdecdfboot2p(k,2*i)){
-				F1_c1oldp(0) = kdecdfboot2p(k,2*i+1);
+			if(theta1old(0)<=kdecdfboot2p(k,0)){
+				F1_c1oldp(0) = kdecdfboot2p(k,1);
 				break;
 			}
 			k = k + 1;
 		}
 		k = 0;
 		while(k < kdeN){
-			if(theta1old(0)<=kdecdfboot3p(k,2*i)){
-				F2_c1oldp(0) = kdecdfboot3p(k,2*i+1);
+			if(theta1old(0)<=kdecdfboot3p(k,0)){
+				F2_c1oldp(0) = kdecdfboot3p(k,1);
 				break;
 			}
 			k = k + 1;
@@ -1085,32 +1085,32 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 
 		k = 0;
 		while(k < kdeN){
-			if(theta0new(0)<=kdecdfboot1(k,2*i)){
-				F0_c0new(0) = kdecdfboot1(k,2*i+1);
+			if(theta0new(0)<=kdecdfboot1(k,0)){
+				F0_c0new(0) = kdecdfboot1(k,1);
 				break;
 			}
 			k = k + 1;
 		}
 		k = 0;
 		while(k < kdeN){
-			if(theta0new(0)<=kdecdfboot2(k,2*i)){
-				F1_c0new(0) = kdecdfboot2(k,2*i+1);
+			if(theta0new(0)<=kdecdfboot2(k,0)){
+				F1_c0new(0) = kdecdfboot2(k,1);
 				break;
 			}
 			k = k + 1;
 		}
 		k = 0;
 		while(k < kdeN){
-			if(theta1new(0)<=kdecdfboot2(k,2*i)){
-				F1_c1new(0) = kdecdfboot2(k,2*i+1);
+			if(theta1new(0)<=kdecdfboot2(k,0)){
+				F1_c1new(0) = kdecdfboot2(k,1);
 				break;
 			}
 			k = k + 1;
 		}
 		k = 0;
 		while(k < kdeN){
-			if(theta1new(0)<=kdecdfboot3(k,2*i)){
-				F2_c1new(0) = kdecdfboot3(k,2*i+1);
+			if(theta1new(0)<=kdecdfboot3(k,0)){
+				F2_c1new(0) = kdecdfboot3(k,1);
 				break;
 			}
 			k = k + 1;
@@ -1120,32 +1120,32 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 		if(priorweight>0.0){
 			k = 0;
 			while(k < kdeN){
-				if(theta0new(0)<=kdecdfboot1p(k,2*i)){
-					F0_c0newp(0) = kdecdfboot1p(k,2*i+1);
+				if(theta0new(0)<=kdecdfboot1p(k,0)){
+					F0_c0newp(0) = kdecdfboot1p(k,1);
 					break;
 				}
 				k = k + 1;
 			}
 			k = 0;
 			while(k < kdeN){
-				if(theta0new(0)<=kdecdfboot2p(k,2*i)){
-					F1_c0newp(0) = kdecdfboot2p(k,2*i+1);
+				if(theta0new(0)<=kdecdfboot2p(k,0)){
+					F1_c0newp(0) = kdecdfboot2p(k,1);
 					break;
 				}
 				k = k + 1;
 			}
 			k = 0;
 			while(k < kdeN){
-				if(theta1new(0)<=kdecdfboot2p(k,2*i)){
-					F1_c1newp(0) = kdecdfboot2p(k,2*i+1);
+				if(theta1new(0)<=kdecdfboot2p(k,0)){
+					F1_c1newp(0) = kdecdfboot2p(k,1);
 					break;
 				}	
 				k = k + 1;
 			}
 			k = 0;
 			while(k < kdeN){
-				if(theta1new(0)<=kdecdfboot3p(k,2*i)){
-					F2_c1newp(0) = kdecdfboot3p(k,2*i+1);
+				if(theta1new(0)<=kdecdfboot3p(k,0)){
+					F2_c1newp(0) = kdecdfboot3p(k,1);
 					break;
 				}	
 				k = k + 1;

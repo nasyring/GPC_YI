@@ -327,6 +327,307 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 	
 }
 
+
+inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<double> nnp, RMatrix<double> priordata, RVector<double> priorweight, RMatrix<double> thetaboot,
+	RVector<double> bootmean0, RVector<double> bootmean1, RVector<double> kdecdflen, RMatrix<double> kdecdfboot1, RMatrix<double> kdecdfboot2, RMatrix<double> kdecdfboot3, RMatrix<double> kdecdfboot1p, RMatrix<double> kdecdfboot2p, RMatrix<double> kdecdfboot3p, RVector<double> scheduleLen, RMatrix<double> priorSched,
+	RVector<double> alpha, RVector<double> M_samp, RVector<double> w, std::size_t i) {
+   	
+
+	int M = int(M_samp[0]);
+	int n = int(nn[0]);
+	int np = int(nnp[0]);
+	int sN = int(scheduleLen[0]);
+	int kdeN = int(kdecdflen[0]);
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
+	double cov_ind = 0.0;
+	NumericVector YIboot(1,0.0);
+   	NumericVector theta0old(1,0.0);
+	NumericVector theta0new(1,0.0);
+	NumericVector theta1old(1,0.0);
+	NumericVector theta1new(1,0.0);
+	NumericVector loglikdiff(1,0.0);
+	NumericVector r(1,0.0);
+	NumericVector uu(1,0.0);
+	NumericVector vv(1,0.0);
+	NumericVector postsamples0(M,0.0);
+	NumericVector postsamples1(M,0.0);
+	NumericVector logpost(M,0.0);
+	NumericVector l0(1,0.0);
+	NumericVector l1(1,0.0);
+	NumericVector u0(1,0.0);
+	NumericVector u1(1,0.0);
+	NumericVector n0(1,0.0);
+	NumericVector n1(1,0.0);
+	NumericVector n2(1,0.0);
+	NumericVector F0_c0old(1,0.0);
+	NumericVector F0_c0new(1,0.0);
+	NumericVector F1_c0old(1,0.0);
+	NumericVector F1_c0new(1,0.0);
+	NumericVector F1_c1old(1,0.0);
+	NumericVector F1_c1new(1,0.0);
+	NumericVector F2_c1old(1,0.0);
+	NumericVector F2_c1new(1,0.0);
+	NumericVector n0p(1,0.0);
+	NumericVector n1p(1,0.0);
+	NumericVector n2p(1,0.0);
+	NumericVector F0_c0oldp(1,0.0);
+	NumericVector F0_c0newp(1,0.0);
+	NumericVector F1_c0oldp(1,0.0);
+	NumericVector F1_c0newp(1,0.0);
+	NumericVector F1_c1oldp(1,0.0);
+	NumericVector F1_c1newp(1,0.0);
+	NumericVector F2_c1oldp(1,0.0);
+	NumericVector F2_c1newp(1,0.0);
+	theta0old(0) = thetaboot(i,0);
+	theta1old(0) = thetaboot(i,1);
+	NumericVector YI(M,0.0);
+	NumericVector YIl(1,0.0);
+	NumericVector YIu(1,0.0);
+
+	
+	for(int j=0; j<sN; j++){
+		if(w[0]<=priorSched(j,0)){
+			prop0(0) = priorSched(j,1);	
+		}
+		if(w[0]<=priorSched(j,2)){
+			prop1(0) = priorSched(j,3);	
+		}		
+	}
+
+	for(int k=0; k<n; k++){
+		YIboot(0) = YIboot(0)+thetaboot(k,2);
+	}
+	YIboot(0) = YIboot(0)/n;
+	
+	int k = 0;
+	while(k < kdeN){
+		if(theta0old(0)<=kdecdfboot1(k,2*i)){
+			F0_c0old(0) = kdecdfboot1(k,2*i+1);
+			break;
+		}			
+	}
+	k = 0;
+	while(k < kdeN){
+		if(theta0old(0)<=kdecdfboot2(k,2*i)){
+			F1_c0old(0) = kdecdfboot2(k,2*i+1);
+			break;
+		}			
+	}
+	k = 0;
+	while(k < kdeN){
+		if(theta1old(0)<=kdecdfboot2(k,2*i)){
+			F1_c1old(0) = kdecdfboot2(k,2*i+1);
+			break;
+		}			
+	}
+	k = 0;
+	while(k < kdeN){
+		if(theta1old(0)<=kdecdfboot3(k,2*i)){
+			F2_c1old(0) = kdecdfboot3(k,2*i+1);
+			break;
+		}			
+	}	
+	
+	
+	if(priorweight>0.0){
+		k = 0;
+		while(k < kdeN){
+			if(theta0old(0)<=kdecdfboot1p(k,2*i)){
+				F0_c0oldp(0) = kdecdfboot1p(k,2*i+1);
+				break;
+			}			
+		}
+		k = 0;
+		while(k < kdeN){
+			if(theta0old(0)<=kdecdfboot2p(k,2*i)){
+				F1_c0oldp(0) = kdecdfboot2p(k,2*i+1);
+				break;
+			}			
+		}
+		k = 0;
+		while(k < kdeN){
+			if(theta1old(0)<=kdecdfboot2p(k,2*i)){
+				F1_c1oldp(0) = kdecdfboot2p(k,2*i+1);
+				break;
+			}			
+		}
+		k = 0;
+		while(k < kdeN){
+			if(theta1old(0)<=kdecdfboot3p(k,2*i)){
+				F2_c1oldp(0) = kdecdfboot3p(k,2*i+1);
+				break;
+			}			
+		}	
+	}
+
+
+	
+	for(int j=0; j<M; j++) {
+		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
+	
+		if( (theta0new(0)>theta1new(0)) ||  (theta0new(0)<datamin(0)) || (theta1new(0)>datamax(0))   ){
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
+		}else {
+		
+		loglikdiff(0) = 0.0;
+		for(int k=0; k<n; k++){
+			if(databoot(k,2*i)==1){
+				if(databoot(k,2*i+1)<=theta0new(0)){
+					F0_c0new(0) = 	F0_c0new(0)+1.0;
+				}	
+			}
+			else if(databoot(k,2*i)==2){
+				if(databoot(k,2*i+1)<=theta0new(0)){
+					F1_c0new(0) = 	F1_c0new(0)+1.0;
+				}
+				if(databoot(k,2*i+1)<=theta1new(0)){
+					F1_c1new(0) = 	F1_c1new(0)+1.0;
+				}	
+			}
+			else {
+				if(databoot(k,2*i+1)<=theta1new(0)){
+					F2_c1new(0) = 	F2_c1new(0)+1.0;
+				}
+			}
+		}
+		F0_c0new(0) = 	F0_c0new(0)/n0(0);
+		F1_c0new(0) = 	F1_c0new(0)/n1(0);
+		F1_c1new(0) = 	F1_c1new(0)/n1(0);
+		F2_c1new(0) = 	F2_c1new(0)/n2(0);
+		
+		for(int k=0; k<np; k++){
+			if(priordata(k,0)==1){
+				if(priordata(k,1)<=theta0new(0)){
+					F0_c0newp(0) = 	F0_c0newp(0)+1.0;
+				}	
+			}
+			else if(priordata(k,0)==2){
+				if(priordata(k,1)<=theta0new(0)){
+					F1_c0newp(0) = 	F1_c0newp(0)+1.0;
+				}
+				if(priordata(k,1)<=theta1new(0)){
+					F1_c1newp(0) = 	F1_c1newp(0)+1.0;
+				}	
+			}
+			else {
+				if(priordata(k,1)<=theta1new(0)){
+					F2_c1newp(0) = 	F2_c1newp(0)+1.0;
+				}
+			}
+		}
+		F0_c0newp(0) = 	F0_c0newp(0)/n0p(0);
+		F1_c0newp(0) = 	F1_c0newp(0)/n1p(0);
+		F1_c1newp(0) = 	F1_c1newp(0)/n1p(0);
+		F2_c1newp(0) = 	F2_c1newp(0)/n2p(0);
+	
+		loglikdiff(0) = w[0]*n*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)))  +   w[0]*priorweight[0]*np*((F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0))-(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0)));
+		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
+		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff(0)) {
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			logpost(j) = w[0]*n*(F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))+w[0]*priorweight[0]*np*(F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0));
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			F0_c0old(0)=F0_c0new(0);
+			F1_c0old(0)=F1_c0new(0);
+			F1_c1old(0)=F1_c1new(0);
+			F2_c1old(0)=F2_c1new(0);
+			F0_c0oldp(0)=F0_c0newp(0);
+			F1_c0oldp(0)=F1_c0newp(0);
+			F1_c1oldp(0)=F1_c1newp(0);
+			F2_c1oldp(0)=F2_c1newp(0);
+			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
+		}
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
+			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
+		}
+		}
+	}	
+/*
+	double templogpost;
+	double tempYI;
+	double temppost0;
+	double temppost1;
+	bool swapped;	
+        for (int j = 0; j < M-1; j++){ 
+		 swapped = false; 
+       		 for (int k = 0; k < M-j-1; k++){  
+           		 if (logpost(k) > logpost(k+1)){ 
+				 swapped = true;
+				 templogpost = logpost(k);
+				 logpost(k) = logpost(k+1);
+				 logpost(k+1) = templogpost;
+				 tempYI = YI(k);
+				 YI(k) = YI(k+1);
+				 YI(k+1) = tempYI;
+				 temppost0 = postsamples0(k);
+				 postsamples0(k) = postsamples0(k+1);
+				 postsamples0(k+1) = temppost0;				 
+				 temppost1 = postsamples1(k);
+				 postsamples1(k) = postsamples1(k+1);
+				 postsamples1(k+1) = temppost1;
+			 }
+		 }
+		 if (swapped == false) 
+			break;
+        }
+			
+	l0[0] = 100000;
+	u0[0] = -100000;
+	l1[0] = 100000;
+	u1[0] = -100000;
+	YIl[0] = 100000;
+	YIu[0] = -100000;
+	for(int i = (0.05*M-1); i<M; i++){
+		if(l0[0]>postsamples0(i)){
+			l0[0]=postsamples0(i);
+		}
+		if(u0[0]<postsamples0(i)){
+			u0[0]=postsamples0(i);
+		}
+		if(l1[0]>postsamples1(i)){
+			l1[0]=postsamples1(i);
+		}
+		if(u1[0]<postsamples1(i)){
+			u1[0]=postsamples1(i);
+		}
+		if(YIl[0]>YI(i)){
+			YIl[0]=YI(i);
+		}
+		if(YIu[0]<YI(i)){
+			YIu[0]=YI(i);
+		}
+	}*/
+	
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
+	std::sort(YI.begin(), YI.end());
+	l0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.975-1);
+	l1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.975-1);
+	YIl[0] = YI[M*.025-1];
+	YIu[0] = YI[M*.975-1];
+	/*if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
+			cov_ind = 1.0;
+	} else {cov_ind = 0.0;}*/
+	if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
+			cov_ind = 1.0;
+	} else {cov_ind = 0.0;}
+	return cov_ind;
+
+	
+}
+
 // Proposal Schedule as input
 // [[Rcpp::export]]
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,

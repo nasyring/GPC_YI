@@ -65,6 +65,41 @@ BEGIN_RCPP
 END_RCPP
 }    
 
+// rcpp_parallel_yi
+NumericVector rcpp_parallel_yi_kde(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot, NumericVector bootmean0,
+	NumericVector bootmean1, NumericVector kdecdflen, NumericMatrix kdecdfboot1, NumericMatrix kdecdfboot2, NumericMatrix kdecdfboot3, NumericMatrix kdecdfboot1p, NumericMatrix kdecdfboot2p, NumericMatrix kdecdfboot3p, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
+	NumericVector w);
+RcppExport SEXP GPCYI_rcpp_parallel_yi_kde(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP kdecdflenSEXP,
+					   SEXP kdecdfboot1SEXP, SEXP kdecdfboot2SEXP, SEXP kdecdfboot3SEXP, SEXP kdecdfboot1pSEXP, SEXP kdecdfboot2pSEXP, SEXP kdecdfboot3pSEXP, 
+                                    SEXP scheduleLenSEXP, SEXP priorSchedSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP, SEXP wSEXP){
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type nnp(nnpSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type priordata(priordataSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type priorweight(priorweightSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type thetaboot(thetabootSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kdecdflen(kdecdflenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot1(kdecdfboot1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot2(kdecdfboot2SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot3(kdecdfboot3SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot1p(kdecdfboot1pSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot2p(kdecdfboot2pSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot3p(kdecdfboot3pSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scheduleLen(scheduleLenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type priorSched(priorSchedSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type B_resamp(B_resampSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    __result = Rcpp::wrap(rcpp_parallel_yi_kde(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w));
+    return __result;
+END_RCPP
+}    
 
 
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
@@ -91,13 +126,45 @@ BEGIN_RCPP
 END_RCPP
 }
 
-
+Rcpp::List GibbsMCMC2kde(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
+	NumericVector bootmean0, NumericVector bootmean1, NumericVector kdecdflen,  NumericMatrix kdecdfboot1, NumericMatrix kdecdfboot2, NumericMatrix kdecdfboot3, NumericMatrix kdecdfboot1p, NumericMatrix kdecdfboot2p, NumericMatrix kdecdfboot3p, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector w);
+RcppExport SEXP GPCYI_GibbsMCMC2kde(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP kdecdfboot1SEXP, SEXP kdecdfboot2SEXP, SEXP kdecdfboot3SEXP, SEXP kdecdfboot1pSEXP, SEXP kdecdfboot2pSEXP, SEXP kdecdfboot3pSEXP,
+				    SEXP scheduleLenSEXP, SEXP priorSchedSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP wSEXP){
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type nnp(nnpSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type priordata(priordataSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type priorweight(priorweightSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type thetaboot(thetabootSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kdecdflen(kdecdflenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot1(kdecdfboot1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot2(kdecdfboot2SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot3(kdecdfboot3SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot1p(kdecdfboot1pSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot2p(kdecdfboot2pSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kdecdfboot3p(kdecdfboot3pSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scheduleLen(scheduleLenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type priorSched(priorSchedSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    __result = Rcpp::wrap(GibbsMCMC2kde(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w));
+    return __result;
+END_RCPP
+}
 
 
 static const R_CallMethodDef CallEntries[] = {
     {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 12},
     {"GPCYI_rcpp_parallel_yi", (DL_FUNC) &GPCYI_rcpp_parallel_yi, 15},
+    {"GPCYI_rcpp_parallel_yi_kde", (DL_FUNC) &GPCYI_rcpp_parallel_yi_kde, 21},
     {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 13},
+    {"GPCYI_GibbsMCMC2kde", (DL_FUNC) &GPCYI_GibbsMCMC2kde, 20},
     {NULL, NULL, 0}
 };
 

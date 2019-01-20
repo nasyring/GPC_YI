@@ -467,7 +467,7 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
 		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
 	
-		if( (theta0new(0)>theta1new(0)) ||  (theta0new(0)<datamin(0)) || (theta1new(0)>datamax(0))   ){
+		if( (theta0new(0)>theta1new(0)) ){
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
 			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
@@ -475,55 +475,66 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 		}else {
 		
 		loglikdiff(0) = 0.0;
-		for(int k=0; k<n; k++){
-			if(databoot(k,2*i)==1){
-				if(databoot(k,2*i+1)<=theta0new(0)){
-					F0_c0new(0) = 	F0_c0new(0)+1.0;
-				}	
-			}
-			else if(databoot(k,2*i)==2){
-				if(databoot(k,2*i+1)<=theta0new(0)){
-					F1_c0new(0) = 	F1_c0new(0)+1.0;
-				}
-				if(databoot(k,2*i+1)<=theta1new(0)){
-					F1_c1new(0) = 	F1_c1new(0)+1.0;
-				}	
-			}
-			else {
-				if(databoot(k,2*i+1)<=theta1new(0)){
-					F2_c1new(0) = 	F2_c1new(0)+1.0;
-				}
-			}
+		k = 0;
+		while(k < kdeN){
+			if(theta0new(0)<=kdecdfboot1(k,2*i)){
+				F0_c0new(0) = kdecdfboot1(k,2*i+1);
+				break;
+			}			
 		}
-		F0_c0new(0) = 	F0_c0new(0)/n0(0);
-		F1_c0new(0) = 	F1_c0new(0)/n1(0);
-		F1_c1new(0) = 	F1_c1new(0)/n1(0);
-		F2_c1new(0) = 	F2_c1new(0)/n2(0);
-		
-		for(int k=0; k<np; k++){
-			if(priordata(k,0)==1){
-				if(priordata(k,1)<=theta0new(0)){
-					F0_c0newp(0) = 	F0_c0newp(0)+1.0;
-				}	
-			}
-			else if(priordata(k,0)==2){
-				if(priordata(k,1)<=theta0new(0)){
-					F1_c0newp(0) = 	F1_c0newp(0)+1.0;
-				}
-				if(priordata(k,1)<=theta1new(0)){
-					F1_c1newp(0) = 	F1_c1newp(0)+1.0;
-				}	
-			}
-			else {
-				if(priordata(k,1)<=theta1new(0)){
-					F2_c1newp(0) = 	F2_c1newp(0)+1.0;
-				}
-			}
+		k = 0;
+		while(k < kdeN){
+			if(theta0new(0)<=kdecdfboot2(k,2*i)){
+				F1_c0new(0) = kdecdfboot2(k,2*i+1);
+				break;
+			}			
 		}
-		F0_c0newp(0) = 	F0_c0newp(0)/n0p(0);
-		F1_c0newp(0) = 	F1_c0newp(0)/n1p(0);
-		F1_c1newp(0) = 	F1_c1newp(0)/n1p(0);
-		F2_c1newp(0) = 	F2_c1newp(0)/n2p(0);
+		k = 0;
+		while(k < kdeN){
+			if(theta1new(0)<=kdecdfboot2(k,2*i)){
+				F1_c1new(0) = kdecdfboot2(k,2*i+1);
+				break;
+			}			
+		}
+		k = 0;
+		while(k < kdeN){
+			if(theta1new(0)<=kdecdfboot3(k,2*i)){
+				F2_c1new(0) = kdecdfboot3(k,2*i+1);
+				break;
+			}			
+		}	
+	
+	
+		if(priorweight>0.0){
+			k = 0;
+			while(k < kdeN){
+				if(theta0new(0)<=kdecdfboot1p(k,2*i)){
+					F0_c0newp(0) = kdecdfboot1p(k,2*i+1);
+					break;
+				}			
+			}
+			k = 0;
+			while(k < kdeN){
+				if(theta0new(0)<=kdecdfboot2p(k,2*i)){
+					F1_c0newp(0) = kdecdfboot2p(k,2*i+1);
+					break;
+				}			
+			}
+			k = 0;
+			while(k < kdeN){
+				if(theta1new(0)<=kdecdfboot2p(k,2*i)){
+					F1_c1newp(0) = kdecdfboot2p(k,2*i+1);
+					break;
+				}			
+			}
+			k = 0;
+			while(k < kdeN){
+				if(theta1new(0)<=kdecdfboot3p(k,2*i)){
+					F2_c1newp(0) = kdecdfboot3p(k,2*i+1);
+					break;
+				}			
+			}	
+		}
 	
 		loglikdiff(0) = w[0]*n*((F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))-(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0)))  +   w[0]*priorweight[0]*np*((F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0))-(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0)));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);

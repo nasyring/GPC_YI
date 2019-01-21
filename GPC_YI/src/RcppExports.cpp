@@ -128,7 +128,7 @@ END_RCPP
 
 Rcpp::List GibbsMCMC2kde(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
 	NumericVector bootmean0, NumericVector bootmean1, NumericVector kdecdflen,  NumericMatrix kdecdfboot1, NumericMatrix kdecdfboot2, NumericMatrix kdecdfboot3, NumericMatrix kdecdfboot1p, NumericMatrix kdecdfboot2p, NumericMatrix kdecdfboot3p, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector w);
-RcppExport SEXP GPCYI_GibbsMCMC2kde(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP kdecdfboot1SEXP, SEXP kdecdfboot2SEXP, SEXP kdecdfboot3SEXP, SEXP kdecdfboot1pSEXP, SEXP kdecdfboot2pSEXP, SEXP kdecdfboot3pSEXP,
+RcppExport SEXP GPCYI_GibbsMCMC2kde(SEXP nnSEXP, SEXP dataSEXP, SEXP nnpSEXP, SEXP priordataSEXP, SEXP priorweightSEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP kdecdflenSEXP, SEXP kdecdfboot1SEXP, SEXP kdecdfboot2SEXP, SEXP kdecdfboot3SEXP, SEXP kdecdfboot1pSEXP, SEXP kdecdfboot2pSEXP, SEXP kdecdfboot3pSEXP,
 				    SEXP scheduleLenSEXP, SEXP priorSchedSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP wSEXP){
 BEGIN_RCPP
     Rcpp::RObject __result;

@@ -33,8 +33,27 @@ END_RCPP
 }
 
 
-
-
+   	
+Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, NumericVector mesh3, NumericVector cdf1, NumericVector cdf2, NumericVector cdf3, int n12, int n23, NumericVector d12, NumericVector d23 );
+RcppExport SEXP GPCYI_GridSearchKDE(SEXP nSEXP, SEXP mesh1SEXP, SEXP mesh2SEXP, SEXP mesh3SEXP, SEXP cdf1SEXP, SEXP cdf2SEXP, SEXP cdf3SEXP, SEXP n12SEXP, SEXP n23SEXP, SEXP d12SEXP, SEXP d23SEXP ){
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mesh1(mesh1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mesh2(mesh2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mesh3(mesh3SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type cdf1(cdf1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type cdf2(cdf2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type cdf3(cdf3SEXP);
+    Rcpp::traits::input_parameter< int >::type n12(n12SEXP);
+    Rcpp::traits::input_parameter< int >::type n23(n23SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type d12(d12SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type d23(d23SEXP);
+    __result = Rcpp::wrap(GridSearchKDE(n, mesh1, mesh2, mesh3, cdf1, cdf2, cdf3, n12, n23, d12, d23));
+    return __result;
+END_RCPP
+}
 
 // rcpp_parallel_yi
 NumericVector rcpp_parallel_yi(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot, NumericVector bootmean0,
@@ -161,6 +180,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 12},
+    {"GPCYI_GridSearchKDE", (DL_FUNC) &GPCYI_GridSearchKDE, 11},
     {"GPCYI_rcpp_parallel_yi", (DL_FUNC) &GPCYI_rcpp_parallel_yi, 15},
     {"GPCYI_rcpp_parallel_yi_kde", (DL_FUNC) &GPCYI_rcpp_parallel_yi_kde, 21},
     {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 13},

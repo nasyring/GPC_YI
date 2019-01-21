@@ -656,7 +656,6 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, NumericVector mesh3, NumericVector cdf1, NumericVector cdf2, NumericVector cdf3, int n12, int n23, NumericVector d12, NumericVector d23 ) {
    	
 	List result;
-	NumericVector 
    	NumericVector YIhat(1,0.0);	
 	NumericVector theta0hat(1,0.0);
 	NumericVector theta1hat(1,0.0);
@@ -699,7 +698,7 @@ Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, Numeri
 				YI(0) = cdf1(index1)-cdf2(index2a)+cdf2(index2b)-cdf3(index3);
 				if(YI(0)>YIhat(0)){
 					YIhat(0) = YI(0);
-					thetahat(0) = theta0(0);
+					theta0hat(0) = theta0(0);
 					theta1hat(0) = theta1(0);
 				}	
 			}

@@ -681,18 +681,22 @@ Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, Numeri
 					diff(0) = abs(mesh1(k) - theta0(0)); 
 					if(diff(0)<diff1(0)){
 						index1 = k;	
+						diff1(0) = diff(0);
 					}
 					diff(0) = abs(mesh2(k) - theta0(0)); 
 					if(diff(0)<diff2a(0)){
 						index2a = k;	
+						diff2a(0) = diff(0);
 					}
 					diff(0) = abs(mesh2(k) - theta1(0)); 
 					if(diff(0)<diff2b(0)){
 						index2b = k;	
+						diff2b(0) = diff(0);
 					}
 					diff(0) = abs(mesh3(k) - theta1(0)); 
 					if(diff(0)<diff3(0)){
 						index3 = k;	
+						diff3(0) = diff(0);
 					}
 				}
 				YI(0) = cdf1(index1)-cdf2(index2a)+cdf2(index2b)-cdf3(index3);

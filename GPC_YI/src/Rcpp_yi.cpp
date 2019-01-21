@@ -994,10 +994,6 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 	}
 	
 	
-	for(int k=0; k<n; k++){
-		YIboot(0) = YIboot(0)+thetaboot(k,2);
-	}
-	YIboot(0) = YIboot(0)/n;
 	
 	int k = 0;
 	while(k < kdeN){
@@ -1033,7 +1029,7 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 	}	
 	
 	
-	if(priorweight>0.0){
+	if(priorweight(0)>0.0){
 		k = 0;
 		while(k < kdeN){
 			if(theta0old(0)<=kdecdfboot1p(k,0)){
@@ -1117,7 +1113,7 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 		}	
 	
 	
-		if(priorweight>0.0){
+		if(priorweight(0)>0.0){
 			k = 0;
 			while(k < kdeN){
 				if(theta0new(0)<=kdecdfboot1p(k,0)){
@@ -1237,7 +1233,7 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 	}
 
 	acc(0) = acc(0)/M;
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu,Rcpp::Named("datamax") = datamax,Rcpp::Named("datamin") = datamin, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1,Rcpp::Named("YI") = YI,Rcpp::Named("YIl") = YIl,Rcpp::Named("YIu") = YIu, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
 
 	return result;
 }

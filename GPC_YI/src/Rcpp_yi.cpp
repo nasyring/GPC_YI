@@ -649,6 +649,78 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 	
 }
 
+
+
+// Proposal Schedule as input
+// [[Rcpp::export]]
+Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, NumericVector mesh3, NumericVector cdf1, NumericVector cdf2, NumericVector cdf3, int n12, int n23, NumericVector d12, NumericVector d23 ) {
+   	
+	List result;
+	NumericVector 
+   	NumericVector YIhat(1,0.0);	
+	NumericVector theta0hat(1,0.0);
+	NumericVector theta1hat(1,0.0);
+	NumericVector YI(1,0.0);	
+	NumericVector theta0(1,0.0);
+	NumericVector theta1(1,0.0);
+	NumericVector diff1(1,10.0);
+	NumericVector diff2a(1,10.0);
+	NumericVector diff2b(1,10.0);
+	NumericVector diff3(1,10.0);
+	NumericVector diff(1,0.0);
+	int index1 = 0;
+	int index2a = 0;
+	int index2b = 0;
+	int index3 = 0;
+	
+	for(int i = 0; i < n12; i++){
+		for(int j = 0; j < n23; j++){
+			theta0(0) = d12(i);
+			theta1(0) = d23(j);
+			if(theta0(0)<theta1(0)){
+				for(int k = 0; k < n; k++){
+					diff(0) = abs(mesh1(k) - theta0(0)); 
+					if(diff(0)<diff1(0)){
+						index1 = k;	
+					}
+					diff(0) = abs(mesh2(k) - theta0(0)); 
+					if(diff(0)<diff2a(0)){
+						index2a = k;	
+					}
+					diff(0) = abs(mesh2(k) - theta1(0)); 
+					if(diff(0)<diff2b(0)){
+						index2b = k;	
+					}
+					diff(0) = abs(mesh3(k) - theta1(0)); 
+					if(diff(0)<diff3(0)){
+						index3 = k;	
+					}
+				}
+				YI(0) = cdf1(index1)-cdf2(index2a)+cdf2(index2b)-cdf3(index3);
+				if(YI(0)>YIhat(0)){
+					YIhat(0) = YI(0);
+					thetahat(0) = theta0(0);
+					theta1hat(0) = theta1(0);
+				}	
+			}
+		}
+	}
+	
+	result = Rcpp::List::create(Rcpp::Named("YI") = YIhat, Rcpp::Named("theta0") = theta0hat, Rcpp::Named("theta1") = theta1hat);
+
+	return result;
+	
+}
+   	
+
+
+
+
+
+
+
+
+
 // Proposal Schedule as input
 // [[Rcpp::export]]
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,

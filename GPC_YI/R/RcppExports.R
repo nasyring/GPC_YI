@@ -19,6 +19,6 @@ rcpp_parallel_yi_kde <- function(nn, data, nnp, priordata, priorweight, thetaboo
     .Call(`GPCYI_rcpp_parallel_yi_kde`,  nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w)   
 }
 
-GibbsMCMC2kde <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w){
-    .Call(`GPCYI_GibbsMCMC2kde`, nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w)    
+GibbsMCMCkde2 <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w){
+    .Call(`GPCYI_GibbsMCMCkde2`, nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w)    
 }

@@ -428,7 +428,7 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 	}	
 	
 	
-	if(priorweight>0.0){
+	if(priorweight(0)>0.0){
 		k = 0;
 		while(k < kdeN){
 			if(theta0old(0)<=kdecdfboot1p(k,2*i)){
@@ -511,7 +511,7 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 		}	
 	
 	
-		if(priorweight>0.0){
+		if(priorweight(0)>0.0){
 			k = 0;
 			while(k < kdeN){
 				if(theta0new(0)<=kdecdfboot1p(k,2*i)){

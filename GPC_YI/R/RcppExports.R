@@ -19,8 +19,8 @@ GridSearchKDE <- function(n, mesh1, mesh2, mesh3, cdf1, cdf2, cdf3, n12, n23, d1
     .Call(`GPCYI_GridSearchKDE`, n, mesh1, mesh2, mesh3, cdf1, cdf2, cdf3, n12, n23, d12, d23)    
 }
 
-rcpp_parallel_yi_kde <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w){
-    .Call(`GPCYI_rcpp_parallel_yi_kde`,  nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w)   
+rcpp_parallel_yi_kde <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, bootmeanYI, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w){
+    .Call(`GPCYI_rcpp_parallel_yi_kde`,  nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, bootmeanYI, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w)   
 }
 
 GibbsMCMCkde2 <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w){

@@ -1804,6 +1804,7 @@ struct GPCYI_yi_kde_mcmc_parallel : public Worker {
 	const RMatrix<double> thetaboot;
 	const RVector<double> bootmean0;
 	const RVector<double> bootmean1;
+	const RVector<double> bootmeanYI;
 	const RVector<double> kdecdflen;
 	const RMatrix<double> kdecdfboot1;
 	const RMatrix<double> kdecdfboot2;
@@ -1821,22 +1822,22 @@ struct GPCYI_yi_kde_mcmc_parallel : public Worker {
 
    // initialize with source and destination
    GPCYI_yi_kde_mcmc_parallel(const NumericVector nn, const NumericMatrix data, const NumericVector nnp, const NumericMatrix priordata, const NumericVector priorweight, const NumericMatrix thetaboot,
-	const NumericVector bootmean0, const NumericVector bootmean1, const NumericVector kdecdflen, const NumericMatrix kdecdfboot1, const NumericMatrix kdecdfboot2, const NumericMatrix kdecdfboot3, const NumericMatrix kdecdfboot1p, const NumericMatrix kdecdfboot2p, const NumericMatrix kdecdfboot3p, const NumericVector scheduleLen, const NumericMatrix priorSched,
+	const NumericVector bootmean0, const NumericVector bootmean1, const NumericVector bootmeanYI, const NumericVector kdecdflen, const NumericMatrix kdecdfboot1, const NumericMatrix kdecdfboot2, const NumericMatrix kdecdfboot3, const NumericMatrix kdecdfboot1p, const NumericMatrix kdecdfboot2p, const NumericMatrix kdecdfboot3p, const NumericVector scheduleLen, const NumericMatrix priorSched,
 	const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp,
 	const NumericVector w, NumericVector cover) 
-			: nn(nn), data(data), nnp(nnp), priordata(priordata), priorweight(priorweight),  thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), kdecdflen(kdecdflen), kdecdfboot1(kdecdfboot1), kdecdfboot2(kdecdfboot2), kdecdfboot3(kdecdfboot3), kdecdfboot1p(kdecdfboot1p), kdecdfboot2p(kdecdfboot2p), kdecdfboot3p(kdecdfboot3p), scheduleLen(scheduleLen), priorSched(priorSched), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
+			: nn(nn), data(data), nnp(nnp), priordata(priordata), priorweight(priorweight),  thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), bootmeanYI(bootmeanYI), kdecdflen(kdecdflen), kdecdfboot1(kdecdfboot1), kdecdfboot2(kdecdfboot2), kdecdfboot3(kdecdfboot3), kdecdfboot1p(kdecdfboot1p), kdecdfboot2p(kdecdfboot2p), kdecdfboot3p(kdecdfboot3p), scheduleLen(scheduleLen), priorSched(priorSched), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
 
    // operator
 void operator()(std::size_t begin, std::size_t end) {
 		for (std::size_t i = begin; i < end; i++) {
-			cover[i] = GibbsMCMCkde(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w, i);	
+			cover[i] = GibbsMCMCkde(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, bootmeanYI, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, w, i);	
 		}
 	}
 };
 
 // [[Rcpp::export]]
 NumericVector rcpp_parallel_yi_kde(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot, NumericVector bootmean0,
-	NumericVector bootmean1, NumericVector kdecdflen, NumericMatrix kdecdfboot1, NumericMatrix kdecdfboot2, NumericMatrix kdecdfboot3, NumericMatrix kdecdfboot1p, NumericMatrix kdecdfboot2p, NumericMatrix kdecdfboot3p, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
+	NumericVector bootmean1, NumericVector bootmeanYI, NumericVector kdecdflen, NumericMatrix kdecdfboot1, NumericMatrix kdecdfboot2, NumericMatrix kdecdfboot3, NumericMatrix kdecdfboot1p, NumericMatrix kdecdfboot2p, NumericMatrix kdecdfboot3p, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,
 	NumericVector w) {
 	
    int B = int(B_resamp[0]);
@@ -1844,7 +1845,7 @@ NumericVector rcpp_parallel_yi_kde(NumericVector nn, NumericMatrix data, Numeric
    NumericVector cover(B,2.0); 
 
    // create the worker
-   GPCYI_yi_kde_mcmc_parallel gpcWorker(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w, cover);
+   GPCYI_yi_kde_mcmc_parallel gpcWorker(nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, bootmeanYI, kdecdflen, kdecdfboot1, kdecdfboot2, kdecdfboot3, kdecdfboot1p, kdecdfboot2p, kdecdfboot3p, scheduleLen, priorSched, alpha, M_samp, B_resamp, w, cover);
      
    // call it with parallelFor
    

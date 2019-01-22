@@ -329,7 +329,7 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data, RVector<double
 
 
 inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<double> nnp, RMatrix<double> priordata, RVector<double> priorweight, RMatrix<double> thetaboot,
-	RVector<double> bootmean0, RVector<double> bootmean1, RVector<double> kdecdflen, RMatrix<double> kdecdfboot1, RMatrix<double> kdecdfboot2, RMatrix<double> kdecdfboot3, RMatrix<double> kdecdfboot1p, RMatrix<double> kdecdfboot2p, RMatrix<double> kdecdfboot3p, RVector<double> scheduleLen, RMatrix<double> priorSched,
+	RVector<double> bootmean0, RVector<double> bootmean1, RVector<double> bootmeanYI, RVector<double> kdecdflen, RMatrix<double> kdecdfboot1, RMatrix<double> kdecdfboot2, RMatrix<double> kdecdfboot3, RMatrix<double> kdecdfboot1p, RMatrix<double> kdecdfboot2p, RMatrix<double> kdecdfboot3p, RVector<double> scheduleLen, RMatrix<double> priorSched,
 	RVector<double> alpha, RVector<double> M_samp, RVector<double> w, std::size_t i) {
    	
 
@@ -341,7 +341,6 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
    	NumericVector prop0(1,0.0);
    	NumericVector prop1(1,0.0);
 	double cov_ind = 0.0;
-	NumericVector YIboot(1,0.0);
    	NumericVector theta0old(1,0.0);
 	NumericVector theta0new(1,0.0);
 	NumericVector theta1old(1,0.0);
@@ -389,10 +388,6 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 		}		
 	}
 
-	for(int k=0; k<n; k++){
-		YIboot(0) = YIboot(0)+thetaboot(k,2);
-	}
-	YIboot(0) = YIboot(0)/n;
 	
 	int k = 0;
 	while(k < kdeN){
@@ -638,7 +633,7 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 	u1[0] = postsamples1(M*.975-1);
 	YIl[0] = YI[M*.025-1];
 	YIu[0] = YI[M*.975-1];
-	if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
+	if ( (YIl[0] < bootmeanYI[0]) && (YIu[0] > bootmeanYI[0]) ){
 			cov_ind = 1.0;
 	} else {cov_ind = 0.0;}
 	/*if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){

@@ -464,7 +464,7 @@ inline double GibbsMCMCkde(RVector<double> nn, RMatrix<double> data, RVector<dou
 		theta0new(0) = R::rnorm(theta0old(0), prop0(0));
 		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
 	
-		if( (theta0new(0)>theta1new(0)) ){
+		if( (theta0new(0)>theta1new(0)) || (theta0new(0) < kdecdfboot1(0,2*i)) || (theta0new(0) > kdecdfboot3(kdeN-1,2*i))){
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
 			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
@@ -1140,7 +1140,7 @@ Rcpp::List GibbsMCMCkde2(NumericVector nn, NumericMatrix data, NumericVector nnp
 		theta1new(0) = R::rnorm(theta1old(0), prop1(0));
 		
 		
-		if( (theta0new(0)>theta1new(0))   ){
+		if( (theta0new(0)>theta1new(0)) || (theta0new(0) < kdecdfboot1(0,0)) || (theta1new(0) > kdecdfboot3(kdeN-1,0))   ){
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
 			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));

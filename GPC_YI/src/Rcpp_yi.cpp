@@ -2179,12 +2179,6 @@ NumericVector rcpp_parallel_yi_kde(NumericVector nn, NumericMatrix data, Numeric
 
 
 struct GPCYI_yi_mcmc_smooth_parallel : public Worker {
-
-	(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
-	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot1, RMatrix<double> databoot2, RVector<double> normprior, 
-	RVector<double> scheduleLen, RMatrix<double> propSched, RVector<double> ddelta, RVector<double> alpha, RVector<double> M_samp, 
-	RVector<double> w, std::size_t i)
-	
 	
 	const RVector<double> nn;
 	const RMatrix<double> data1;
@@ -2219,6 +2213,31 @@ void operator()(std::size_t begin, std::size_t end) {
 
 
 Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericVector bootmean0, NumericVector bootmean1, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector alpha, NumericVector ddelta, NumericVector M_samp, NumericVector w) {
+
+
+// [[Rcpp::export]]
+NumericVector rcpp_parallel_yi_smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
+	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
+	NumericVector w) {
+	
+	
+	
+   int B = int(B_resamp[0]);
+   // allocate the matrix we will return
+   NumericVector cover(B,2.0); 
+
+   // create the worker
+   GPCYI_yi_mcmc_smooth_parallel gpcWorker(nn, data1, data2, thetaboot, bootmean0,
+	bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, 
+	w, cover);
+     
+   // call it with parallelFor
+   
+   parallelFor(0, B, gpcWorker);
+
+   return cover;
+}
+	
 	
 
 // [[Rcpp::export]]

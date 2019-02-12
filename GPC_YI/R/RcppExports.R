@@ -20,6 +20,11 @@ GibbsMCMC2 <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmea
     .Call(`GPCYI_GibbsMCMC2`, nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, scheduleLen, priorSched, alpha, M_samp, w)    
 }
 
+GibbsMCMC2smooth <- function(nn, data1, data2, bootmean0, bootmean1, normprior, scheduleLen, propSched, alpha, ddelta, M_samp, w){
+    .Call(`GPCYI_GibbsMCMC2smooth`, nn, data1, data2, bootmean0, bootmean1, normprior, scheduleLen, propSched, alpha, ddelta, M_samp, w)    
+}
+
+
 GridSearchKDE <- function(n, mesh1, mesh2, mesh3, cdf1, cdf2, cdf3, n12, n23, d12, d23){
     .Call(`GPCYI_GridSearchKDE`, n, mesh1, mesh2, mesh3, cdf1, cdf2, cdf3, n12, n23, d12, d23)    
 }

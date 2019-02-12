@@ -713,8 +713,8 @@ Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, Numeri
 
 
 
-inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
-	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot1, RMatrix<double> databoot2, 
+inline double GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
+	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot1, RMatrix<double> databoot2, RVector<double> normprior, 
 	RVector<double> scheduleLen, RMatrix<double> propSched, RVector<double> ddelta, RVector<double> alpha, RVector<double> M_samp, 
 	RVector<double> w, std::size_t i) {
    	
@@ -725,7 +725,8 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data1, RMatrix<doubl
 	double delta = double(ddelta[0]);
    	NumericVector prop0(1,0.0);
    	NumericVector prop1(1,0.0);
-	double cov_ind = 0.0;
+	double cov_ind[2][1] = {{0.0},{0.0}};
+	double z1 = 0.0; double z2 = 0.0;
    	NumericVector theta0old(1,0.0);
 	NumericVector theta0new(1,0.0);
 	NumericVector theta1old(1,0.0);
@@ -733,13 +734,14 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data1, RMatrix<doubl
 	NumericVector theta0temp(1,0.0);
 	NumericVector theta1temp(1,0.0);
 	NumericVector loglikdiff(1,0.0);
+	NumericVector loss1temp(1,0.0);
+	NumericVector loss2temp(1,0.0);	
 	NumericVector loss1old(1,0.0);
 	NumericVector loss1new(1,0.0);
 	NumericVector loss2old(1,0.0);
 	NumericVector loss2new(1,0.0);
 	NumericVector r(1,0.0);
 	NumericVector uu(1,0.0);
-	NumericVector vv(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
 	NumericVector logpost(M,0.0);
@@ -761,10 +763,30 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data1, RMatrix<doubl
 			prop1(0) = propSched(j,3);	
 		}		
 	}
+	if(z>-delta/2 & z<=delta/2){
+		val <- 0.5+0.5*sin((pi/delta)*z+pi)
+	}else if(z<0){
+		val <- 1
+	}
 
 	for(int k=0; k<n; k++){
-		loss1old(0) = loss1old(0) + 0.5 + 0.5*sin((pi/delta)*(databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0old(0)))+pi);
-		loss2old(0) = loss2old(0) + 0.5 + 0.5*sin((pi/delta)*(databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1old(0)))+pi);
+		z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0old(0));
+		loss1temp(0)=0;
+		if((z1>-delta/2) && (z1<=delta/2)){
+			loss1temp(0) = 0.5 + 0.5*sin((pi/delta)*(z1)+pi);
+		}else if(z1<0){
+			loss1temp(0) = 1.0;	
+		}
+		loss1old(0) = loss1old(0) + loss1temp(0);
+		
+		z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1old(0));
+		loss2temp(0)=0;
+		if((z2>-delta/2) && (z2<=delta/2)){
+			loss2temp(0) = 0.5 + 0.5*sin((pi/delta)*(z2)+pi);
+		}else if(z2<0){
+			loss2temp(0) = 1.0;	
+		}
+		loss2old(0) = loss2old(0) + loss2temp(0);
 	}
 
 	for(int j=0; j<M; j++) {
@@ -777,37 +799,39 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data1, RMatrix<doubl
 		loss2new(0) = 0.0;
 		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
-			loss1new(0) = loss1new(0) + 0.5 + 0.5*sin((pi/delta)*(databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0new(0)))+pi);
-			loss2new(0) = loss2new(0) + 0.5 + 0.5*sin((pi/delta)*(databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1new(0)))+pi);		
+			z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0new(0));
+			loss1temp(0)=0;
+			if((z1>-delta/2) && (z1<=delta/2)){
+				loss1temp(0) = 0.5 + 0.5*sin((pi/delta)*(z1)+pi);
+			}else if(z1<0){
+				loss1temp(0) = 1.0;	
+			}
+			loss1new(0) = loss1new(0) + loss1temp(0);
+		
+			z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1new(0));
+			loss2temp(0)=0;
+			if((z2>-delta/2) && (z2<=delta/2)){
+				loss2temp(0) = 0.5 + 0.5*sin((pi/delta)*(z2)+pi);
+			}else if(z2<0){
+				loss2temp(0) = 1.0;	
+			}
+			loss2new(0) = loss2new(0) + loss2temp(0);
 		}
 
-		
-
-	
-		loglikdiff(0) = ;
-		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
+		loglikdiff(0) = w[0]*(loss2new(0)-loss2old(0)+loss1new(0)-loss1old(0));
+		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2])*R::dnorm(theta1new(0),normprior[3],normprior[4])+R::dnorm(theta1new(0),normprior[1],normprior[2])*R::dnorm(theta0new(0),normprior[3],normprior[4]))/(R::dnorm(theta0old(0),normprior[1],normprior[2])*R::dnorm(theta1old(0),normprior[3],normprior[4])+R::dnorm(theta1old(0),normprior[1],normprior[2])*R::dnorm(theta0old(0),normprior[3],normprior[4]))), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
 			postsamples1(j) = theta1new(0);
-			logpost(j) = w[0]*n*(F0_c0new(0)+F1_c1new(0)-F1_c0new(0)-F2_c1new(0))+w[0]*priorweight[0]*np*(F0_c0newp(0)+F1_c1newp(0)-F1_c0newp(0)-F2_c1newp(0));
+			logpost(j) = log(loglikdiff(0));
 			theta0old(0) = theta0new(0);
 			theta1old(0) = theta1new(0);
-			F0_c0old(0)=F0_c0new(0);
-			F1_c0old(0)=F1_c0new(0);
-			F1_c1old(0)=F1_c1new(0);
-			F2_c1old(0)=F2_c1new(0);
-			F0_c0oldp(0)=F0_c0newp(0);
-			F1_c0oldp(0)=F1_c0newp(0);
-			F1_c1oldp(0)=F1_c1newp(0);
-			F2_c1oldp(0)=F2_c1newp(0);
-			YI(j) = F0_c0new(0) + F1_c1new(0) - F1_c0new(0) - F2_c1new(0);
 		}
 		else {
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
-			logpost(j) = w[0]*n*(F0_c0old(0)+F1_c1old(0)-F1_c0old(0)-F2_c1old(0))+w[0]*priorweight[0]*np*(F0_c0oldp(0)+F1_c1oldp(0)-F1_c0oldp(0)-F2_c1oldp(0));
-			YI(j) = F0_c0old(0) + F1_c1old(0) - F1_c0old(0) - F2_c1old(0);
+			logpost(j) = logpost(j-1);
 		}
 		}
 	}	
@@ -869,19 +893,16 @@ inline double GibbsMCMC(RVector<double> nn, RMatrix<double> data1, RMatrix<doubl
 	
 	std::sort(postsamples0.begin(), postsamples0.end());
 	std::sort(postsamples1.begin(), postsamples1.end());
-	std::sort(YI.begin(), YI.end());
 	l0[0] = postsamples0(M*.025-1);
 	u0[0] = postsamples0(M*.975-1);
 	l1[0] = postsamples1(M*.025-1);
 	u1[0] = postsamples1(M*.975-1);
-	YIl[0] = YI[M*.025-1];
-	YIu[0] = YI[M*.975-1];
-	/*if ( (YIl[0] < YIboot[0]) && (YIu[0] > YIboot[0]) ){
-			cov_ind = 1.0;
-	} else {cov_ind = 0.0;}*/
 	if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
-			cov_ind = 1.0;
-	} else {cov_ind = 0.0;}
+			cov_ind[0][0] = 1.0;
+	} else {cov_ind[0][0] = 0.0;}
+	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
+			cov_ind[1][0] = 1.0;
+	} else {cov_ind[1][0] = 0.0;}
 	return cov_ind;
 
 	

@@ -243,8 +243,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"GPCYI_GPCYI_yi_parallel", (DL_FUNC) &GPCYI_GPCYI_yi_parallel, 12},
     {"GPCYI_GridSearchKDE", (DL_FUNC) &GPCYI_GridSearchKDE, 11},
     {"GPCYI_rcpp_parallel_yi", (DL_FUNC) &GPCYI_rcpp_parallel_yi, 15},
+    {"GPCYI_rcpp_parallel_smooth_yi", (DL_FUNC) &GPCYI_rcpp_parallel_smooth_yi, 15},
     {"GPCYI_rcpp_parallel_yi_kde", (DL_FUNC) &GPCYI_rcpp_parallel_yi_kde, 22},
     {"GPCYI_GibbsMCMC2", (DL_FUNC) &GPCYI_GibbsMCMC2, 13},
+    {"GPCYI_GibbsMCMC2smooth", (DL_FUNC) &GPCYI_GibbsMCMC2smooth, 12},
     {"GPCYI_GibbsMCMCkde2", (DL_FUNC) &GPCYI_GibbsMCMCkde2, 20},
     {NULL, NULL, 0}
 };

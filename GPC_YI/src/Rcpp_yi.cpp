@@ -2194,14 +2194,15 @@ struct GPCYI_yi_mcmc_smooth_parallel : public Worker {
 	const RVector<double> ddelta;
 	const RVector<double> alpha;
 	const RVector<double> M_samp;
+	const RVector<double> B_resamp;
 	const RVector<double> w;
 	RVector<double> cover;
 
    // initialize with source and destination
    GPCYI_yi_mcmc_smooth_parallel(const NumericVector nn, const NumericMatrix data1, const NumericMatrix data2, const NumericMatrix thetaboot,
 	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot1, const NumericMatrix databoot2, const NumericVector normprior, const NumericVector scheduleLen, const NumericMatrix propSched,
-	const NumericVector ddelta, const NumericVector alpha, const NumericVector M_samp, const NumericVector w, NumericVector cover) 
-			: nn(nn), data1(data1), data2(data2), thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot1(databoot1), databoot2(databoot2), normprior(normprior), scheduleLen(scheduleLen), propSched(propSched), ddelta(ddelta), alpha(alpha), M_samp(M_samp), w(w), cover(cover) {}   
+	const NumericVector ddelta, const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp, const NumericVector w, NumericVector cover) 
+			: nn(nn), data1(data1), data2(data2), thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot1(databoot1), databoot2(databoot2), normprior(normprior), scheduleLen(scheduleLen), propSched(propSched), ddelta(ddelta), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover) {}   
 
    // operator
 void operator()(std::size_t begin, std::size_t end) {
@@ -2212,16 +2213,11 @@ void operator()(std::size_t begin, std::size_t end) {
 };
 
 
-Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericVector bootmean0, NumericVector bootmean1, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector alpha, NumericVector ddelta, NumericVector M_samp, NumericVector w) {
-
-
 // [[Rcpp::export]]
 NumericVector rcpp_parallel_yi_smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
 	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
 	NumericVector w) {
-	
-	
-	
+		
    int B = int(B_resamp[0]);
    // allocate the matrix we will return
    NumericVector cover(B,2.0); 

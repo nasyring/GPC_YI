@@ -84,6 +84,41 @@ BEGIN_RCPP
 END_RCPP
 }    
 
+NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
+	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
+	NumericVector w) {
+
+// rcpp_parallel_yi
+NumericVector rcpp_parallel_smooth_yi(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
+	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
+	NumericVector w);
+RcppExport SEXP GPCYI_rcpp_parallel_smooth_yi(SEXP nnSEXP, SEXP data1SEXP, SEXP data2SEXP, SEXP thetabootSEXP, SEXP bootmean0SEXP,
+	SEXP bootmean1SEXP, SEXP databoot1SEXP, SEXP databoot2SEXP, SEXP normpriorSEXP, SEXP scheduleLenSEXP, SEXP propSchedSEXP, SEXP ddeltaSEXP, SEXP alphaSEXP, SEXP M_sampSEXP, SEXP B_resampSEXP, 
+	SEXP wSEXP){
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data1(data1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data2(data2SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type thetaboot(thetabootSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type databoot1(databoot1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type databoot2(databoot2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scheduleLen(scheduleLenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type proSched(propSchedSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ddelta(ddeltaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type B_resamp(B_resampSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    __result = Rcpp::wrap(rcpp_parallel_yi(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w));
+    return __result;
+END_RCPP
+}    
+
+
 // rcpp_parallel_yi
 NumericVector rcpp_parallel_yi_kde(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot, NumericVector bootmean0,
 	NumericVector bootmean1, NumericVector bootmeanYI, NumericVector kdecdflen, NumericMatrix kdecdfboot1, NumericMatrix kdecdfboot2, NumericMatrix kdecdfboot3, NumericMatrix kdecdfboot1p, NumericMatrix kdecdfboot2p, NumericMatrix kdecdfboot3p, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp,

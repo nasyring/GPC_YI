@@ -110,7 +110,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type B_resamp(B_resampSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
-    __result = Rcpp::wrap(rcpp_parallel_yi(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w));
+    __result = Rcpp::wrap(rcpp_parallel_smooth_yi(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w));
     return __result;
 END_RCPP
 }    

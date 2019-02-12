@@ -104,7 +104,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type databoot1(databoot1SEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type databoot2(databoot2SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type scheduleLen(scheduleLenSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type proSched(propSchedSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type propSched(propSchedSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type ddelta(ddeltaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);

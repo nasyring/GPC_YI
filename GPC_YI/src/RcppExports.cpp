@@ -84,9 +84,6 @@ BEGIN_RCPP
 END_RCPP
 }    
 
-NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
-	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
-	NumericVector w) {
 
 // rcpp_parallel_yi
 NumericVector rcpp_parallel_smooth_yi(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,

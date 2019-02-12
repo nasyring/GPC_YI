@@ -763,11 +763,7 @@ inline double GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix
 			prop1(0) = propSched(j,3);	
 		}		
 	}
-	if(z>-delta/2 & z<=delta/2){
-		val <- 0.5+0.5*sin((pi/delta)*z+pi)
-	}else if(z<0){
-		val <- 1
-	}
+
 
 	for(int k=0; k<n; k++){
 		z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0old(0));
@@ -909,6 +905,140 @@ inline double GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix
 }
 
 
+
+
+// Proposal Schedule as input
+// [[Rcpp::export]]
+Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericVector bootmean0, NumericVector bootmean1, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector alpha, NumericVector ddelta, NumericVector M_samp, NumericVector w) {
+	
+	List result;
+	double pi = 3.14159265358979323846;
+	int M = int(M_samp[0]);
+	int n = int(nn[0]);
+	int sN = int(scheduleLen[0]);
+	double delta = double(ddelta[0]);
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
+	double z1 = 0.0; double z2 = 0.0;
+   	NumericVector theta0old(1,0.0);
+	NumericVector theta0new(1,0.0);
+	NumericVector theta1old(1,0.0);
+	NumericVector theta1new(1,0.0);
+	NumericVector theta0temp(1,0.0);
+	NumericVector theta1temp(1,0.0);
+	NumericVector loglikdiff(1,0.0);
+	NumericVector loss1temp(1,0.0);
+	NumericVector loss2temp(1,0.0);	
+	NumericVector loss1old(1,0.0);
+	NumericVector loss1new(1,0.0);
+	NumericVector loss2old(1,0.0);
+	NumericVector loss2new(1,0.0);
+	NumericVector r(1,0.0);
+	NumericVector uu(1,0.0);
+	NumericVector postsamples0(M,0.0);
+	NumericVector postsamples1(M,0.0);
+	NumericVector logpost(M,0.0);
+	NumericVector l0(1,0.0);
+	NumericVector l1(1,0.0);
+	NumericVector u0(1,0.0);
+	NumericVector u1(1,0.0);
+	theta0old(0) = bootmean0(0);
+	theta1old(0) = bootmean1(0);
+	NumericVector acc(1, 0.0);
+
+
+
+	
+	for(int j=0; j<sN; j++){
+		if(w[0]<=propSched(j,0)){
+			prop0(0) = propSched(j,1);	
+		}
+		if(w[0]<=propSched(j,2)){
+			prop1(0) = propSched(j,3);	
+		}		
+	}
+
+
+	for(int k=0; k<n; k++){
+		z1 = data1(k,0)*(data1(k,1)-theta0old(0));
+		loss1temp(0)=0;
+		if((z1>-delta/2) && (z1<=delta/2)){
+			loss1temp(0) = 0.5 + 0.5*sin((pi/delta)*(z1)+pi);
+		}else if(z1<0){
+			loss1temp(0) = 1.0;	
+		}
+		loss1old(0) = loss1old(0) + loss1temp(0);
+		
+		z2 = data2(k,0)*(data2(k,1)-theta1old(0));
+		loss2temp(0)=0;
+		if((z2>-delta/2) && (z2<=delta/2)){
+			loss2temp(0) = 0.5 + 0.5*sin((pi/delta)*(z2)+pi);
+		}else if(z2<0){
+			loss2temp(0) = 1.0;	
+		}
+		loss2old(0) = loss2old(0) + loss2temp(0);
+	}
+
+	for(int j=0; j<M; j++) {
+		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1temp(0) = R::rnorm(theta1old(0), prop1(0));
+		theta0new(0) = min(theta0temp(0), theta1temp(0));
+		theta1new(0) = max(theta0temp(0), theta1temp(0));
+		
+		loss1new(0) = 0.0;
+		loss2new(0) = 0.0;
+		loglikdiff(0) = 0.0;
+		for(int k=0; k<n; k++){
+			z1 = data1(k,0)*(data1(k,1)-theta0new(0));
+			loss1temp(0)=0;
+			if((z1>-delta/2) && (z1<=delta/2)){
+				loss1temp(0) = 0.5 + 0.5*sin((pi/delta)*(z1)+pi);
+			}else if(z1<0){
+				loss1temp(0) = 1.0;	
+			}
+			loss1new(0) = loss1new(0) + loss1temp(0);
+		
+			z2 = data2(k,0)*(data2(k,1)-theta1new(0));
+			loss2temp(0)=0;
+			if((z2>-delta/2) && (z2<=delta/2)){
+				loss2temp(0) = 0.5 + 0.5*sin((pi/delta)*(z2)+pi);
+			}else if(z2<0){
+				loss2temp(0) = 1.0;	
+			}
+			loss2new(0) = loss2new(0) + loss2temp(0);
+		}
+
+		loglikdiff(0) = w[0]*(loss2new(0)-loss2old(0)+loss1new(0)-loss1old(0));
+		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2])*R::dnorm(theta1new(0),normprior[3],normprior[4])+R::dnorm(theta1new(0),normprior[1],normprior[2])*R::dnorm(theta0new(0),normprior[3],normprior[4]))/(R::dnorm(theta0old(0),normprior[1],normprior[2])*R::dnorm(theta1old(0),normprior[3],normprior[4])+R::dnorm(theta1old(0),normprior[1],normprior[2])*R::dnorm(theta0old(0),normprior[3],normprior[4]))), 1.0);
+		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff(0)) {
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			logpost(j) = log(loglikdiff(0));
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			acc(0) = acc(0)+1;
+		}
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			logpost(j) = logpost(j-1);
+		}
+		}
+	}	
+
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
+	l0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.975-1);
+	l1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.975-1);
+
+	acc(0) = acc(0)/M;
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
+
+	return result;
+}
 
 
 

@@ -156,6 +156,31 @@ BEGIN_RCPP
 END_RCPP
 }    
 
+			
+		
+Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericVector bootmean0, NumericVector bootmean1, NumericVector normprior, NumericVector scheduleLen, NumericMatrix propSched, NumericVector alpha, NumericVector ddelta, NumericVector M_samp, NumericVector w);
+RcppExport SEXP GPCYI_GibbsMCMC2smooth(SEXP nnSEXP, SEXP data1SEXP, SEXP data2SEXP, SEXP bootmean0SEXP, SEXP bootmean1SEXP, SEXP normpriorSEXP, SEXP scheduleLenSEXP, SEXP propSchedSEXP, SEXP alphaSEXP, SEXP ddeltaSEXP, SEXP M_sampSEXP, SEXP wSEXP){
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data1(data1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data2(data2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean0(bootmean0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type bootmean1(bootmean1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type normprior(normpriorSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scheduleLen(scheduleLenSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type propSched(propSchedSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ddelta(ddeltaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type M_samp(M_sampSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    __result = Rcpp::wrap(GibbsMCMC2smooth(nn, data1, data2, bootmean0, bootmean1, normprior, scheduleLen, propSched, alpha, ddelta, M_samp, w));
+    return __result;
+END_RCPP
+}
+		
+		
 
 Rcpp::List GibbsMCMC2(NumericVector nn, NumericMatrix data, NumericVector nnp, NumericMatrix priordata, NumericVector priorweight, NumericMatrix thetaboot,
 	NumericVector bootmean0, NumericVector bootmean1, NumericVector scheduleLen, NumericMatrix priorSched, NumericVector alpha, NumericVector M_samp, NumericVector w);

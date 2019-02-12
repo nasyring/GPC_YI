@@ -713,7 +713,7 @@ Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, Numeri
 
 
 
-inline double * GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
+inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
 	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot1, RMatrix<double> databoot2, RVector<double> normprior, 
 	RVector<double> scheduleLen, RMatrix<double> propSched, RVector<double> ddelta, RVector<double> alpha, RVector<double> M_samp, 
 	RVector<double> w, std::size_t i) {
@@ -725,7 +725,7 @@ inline double * GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatr
 	double delta = double(ddelta[0]);
    	NumericVector prop0(1,0.0);
    	NumericVector prop1(1,0.0);
-	double cov_ind[2][1] = {{0.0},{0.0}};
+	std::vector<double> cov_ind;
 	double z1 = 0.0; double z2 = 0.0;
    	NumericVector theta0old(1,0.0);
 	NumericVector theta0new(1,0.0);
@@ -893,11 +893,11 @@ inline double * GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatr
 	l1[0] = postsamples1(M*.025-1);
 	u1[0] = postsamples1(M*.975-1);
 	if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
-			cov_ind[0][0] = 1.0;
-	} else {cov_ind[0][0] = 0.0;}
+		cov_ind.push_back(1.0);
+	} else {cov_ind.push_back(0.0);}
 	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
-			cov_ind[1][0] = 1.0;
-	} else {cov_ind[1][0] = 0.0;}
+		cov_ind.push_back(1.0);
+	} else {cov_ind.push_back(0.0);}
 	
 	return cov_ind;	
 }

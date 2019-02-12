@@ -713,7 +713,7 @@ Rcpp::List GridSearchKDE(int n, NumericVector mesh1, NumericVector mesh2, Numeri
 
 
 
-inline double GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
+inline double[2][1] GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
 	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot1, RMatrix<double> databoot2, RVector<double> normprior, 
 	RVector<double> scheduleLen, RMatrix<double> propSched, RVector<double> ddelta, RVector<double> alpha, RVector<double> M_samp, 
 	RVector<double> w, std::size_t i) {
@@ -898,9 +898,8 @@ inline double GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix
 	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
 			cov_ind[1][0] = 1.0;
 	} else {cov_ind[1][0] = 0.0;}
-	return cov_ind;
-
 	
+	return cov_ind;	
 }
 
 

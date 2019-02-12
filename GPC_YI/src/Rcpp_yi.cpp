@@ -829,7 +829,6 @@ inline double GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix
 			postsamples1(j) = theta1old(0);
 			logpost(j) = logpost(j-1);
 		}
-		}
 	}	
 /*
 	double templogpost;
@@ -1023,7 +1022,6 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
 			logpost(j) = logpost(j-1);
-		}
 		}
 	}	
 

@@ -2193,7 +2193,7 @@ struct GPCYI_yi_mcmc_smooth_parallel : public Worker {
 	const RVector<double> M_samp;
 	const RVector<double> B_resamp;
 	const RVector<double> w;
-	RVector<double> cover;
+	RMatrix<double> cover;
 
    // initialize with source and destination
    GPCYI_yi_mcmc_smooth_parallel(const NumericVector nn, const NumericMatrix data1, const NumericMatrix data2, const NumericMatrix thetaboot,
@@ -2204,7 +2204,7 @@ struct GPCYI_yi_mcmc_smooth_parallel : public Worker {
    // operator
 void operator()(std::size_t begin, std::size_t end) {
 		for (std::size_t i = begin; i < end; i++) {
-			cover[i] = GibbsMCMCsmooth(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, w, i);	
+			cover[i,] = GibbsMCMCsmooth(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, w, i);	
 		}
 	}
 };
@@ -2217,7 +2217,7 @@ NumericVector rcpp_parallel_yi_smooth(NumericVector nn, NumericMatrix data1, Num
 		
    int B = int(B_resamp[0]);
    // allocate the matrix we will return
-   NumericVector cover(B,2.0); 
+   NumericMatrix cover(B,2.0); 
 
    // create the worker
    GPCYI_yi_mcmc_smooth_parallel gpcWorker(nn, data1, data2, thetaboot, bootmean0,

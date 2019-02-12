@@ -2220,7 +2220,7 @@ NumericVector rcpp_parallel_yi_smooth(NumericVector nn, NumericMatrix data1, Num
    int B = int(B_resamp[0]);
    // allocate the matrix we will return
    NumericMatrix cover(B,2.0,0.0); 
-   NumericVector temp(2.0,0.0);
+   NumericVector temp(2,0.0);
    // create the worker
    GPCYI_yi_mcmc_smooth_parallel gpcWorker(nn, data1, data2, thetaboot, bootmean0,
 	bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, 

@@ -2199,7 +2199,7 @@ struct GPCYI_yi_mcmc_smooth_parallel : public Worker {
    // initialize with source and destination
    GPCYI_yi_mcmc_smooth_parallel(const NumericVector nn, const NumericMatrix data1, const NumericMatrix data2, const NumericMatrix thetaboot,
 	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot1, const NumericMatrix databoot2, const NumericVector normprior, const NumericVector scheduleLen, const NumericMatrix propSched,
-	const NumericVector ddelta, const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp, const NumericVector w, NumericMatrix cover, NumericVector temp) 
+	const NumericVector ddelta, const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp, const NumericVector w, NumericMatrix cover, std::vector<double> temp) 
 			: nn(nn), data1(data1), data2(data2), thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot1(databoot1), databoot2(databoot2), normprior(normprior), scheduleLen(scheduleLen), propSched(propSched), ddelta(ddelta), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover), temp(temp) {}   
 
    // operator

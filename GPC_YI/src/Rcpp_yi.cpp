@@ -933,6 +933,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	NumericVector theta0temp(1,0.0);
 	NumericVector theta1temp(1,0.0);
 	NumericVector loglikdiff(1,0.0);
+	NumericVector loglikdiff1(1,0.0);
 	NumericVector loss1temp(1,0.0);
 	NumericVector loss2temp(1,0.0);	
 	NumericVector loss1old(1,0.0);
@@ -1015,7 +1016,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 		}
 
 		loglikdiff(0) = -w0*(loss2new(0)-loss2old(0))-w1*(loss1new(0)-loss1old(0));
-		//loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2],0)*R::dnorm(theta1new(0),normprior[3],normprior[4],0)+R::dnorm(theta1new(0),normprior[1],normprior[2],0)*R::dnorm(theta0new(0),normprior[3],normprior[4],0))/(R::dnorm(theta0old(0),normprior[1],normprior[2],0)*R::dnorm(theta1old(0),normprior[3],normprior[4],0)+R::dnorm(theta1old(0),normprior[1],normprior[2],0)*R::dnorm(theta0old(0),normprior[3],normprior[4],0))), 1.0);
+		loglikdiff1(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2],0)*R::dnorm(theta1new(0),normprior[3],normprior[4],0)+R::dnorm(theta1new(0),normprior[1],normprior[2],0)*R::dnorm(theta0new(0),normprior[3],normprior[4],0))/(R::dnorm(theta0old(0),normprior[1],normprior[2],0)*R::dnorm(theta1old(0),normprior[3],normprior[4],0)+R::dnorm(theta1old(0),normprior[1],normprior[2],0)*R::dnorm(theta0old(0),normprior[3],normprior[4],0))), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
@@ -1030,7 +1031,11 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 		else {
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
-			logpost(j) = logpost(j-1);
+			if(j>0){
+				logpost(j) = logpost(j-1);
+			else {
+				logpost(j) = logpost(0);	
+			}
 		}
 	}	
 
@@ -1042,7 +1047,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	u1[0] = postsamples1(M*.975-1);
 
 	acc(0) = acc(0)/M;
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost, Rcpp::Named("loglikdiff") = loglikdiff);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost, Rcpp::Named("loglikdiff") = loglikdiff, Rcpp::Named("loglikdiff1") = loglikdiff1);
 
 	return result;
 }

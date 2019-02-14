@@ -961,6 +961,12 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			prop1(0) = propSched(j,3);	
 		}		
 	}
+	if(w(0)>1.0){
+		prop0(0) = propSched(0,1);	
+	}
+	if(w(1)>1.0){
+		prop1(0) = propSched(0,3);	
+	}
 
 
 	for(int k=0; k<n; k++){

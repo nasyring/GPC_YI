@@ -747,7 +747,6 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 	NumericVector uu(1,0.0);
 	NumericVector postsamples0(M,0.0);
 	NumericVector postsamples1(M,0.0);
-	NumericVector logpost(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
 	NumericVector u0(1,0.0);
@@ -823,7 +822,6 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
 			postsamples1(j) = theta1new(0);
-			logpost(j) = log(loglikdiff(0));
 			theta0old(0) = theta0new(0);
 			theta1old(0) = theta1new(0);
 			loss2old(0) = loss2new(0);
@@ -832,7 +830,6 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 		else {
 			postsamples0(j) = theta0old(0);
 			postsamples1(j) = theta1old(0);
-			logpost(j) = logpost(j-1);
 		}
 	}	
 /*
@@ -1033,7 +1030,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			postsamples1(j) = theta1old(0);
 			if(j>0){
 				logpost(j) = logpost(j-1);
-			else {
+			}else {
 				logpost(j) = logpost(0);	
 			}
 		}

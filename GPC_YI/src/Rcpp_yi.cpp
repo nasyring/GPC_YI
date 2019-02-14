@@ -815,7 +815,7 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 			loss2new(0) = loss2new(0) + loss2temp(0);
 		}
 
-		loglikdiff(0) = w[0]*(loss2new(0)-loss2old(0))+w[1]*(loss1new(0)-loss1old(0));
+		loglikdiff(0) = -w[0]*(loss2new(0)-loss2old(0))-w[1]*(loss1new(0)-loss1old(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2],0)*R::dnorm(theta1new(0),normprior[3],normprior[4],0)+R::dnorm(theta1new(0),normprior[1],normprior[2],0)*R::dnorm(theta0new(0),normprior[3],normprior[4],0))/(R::dnorm(theta0old(0),normprior[1],normprior[2],0)*R::dnorm(theta1old(0),normprior[3],normprior[4],0)+R::dnorm(theta1old(0),normprior[1],normprior[2],0)*R::dnorm(theta0old(0),normprior[3],normprior[4],0))), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
@@ -1008,7 +1008,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			loss2new(0) = loss2new(0) + loss2temp(0);
 		}
 
-		loglikdiff(0) = w[0]*(loss2new(0)-loss2old(0))+w[1]*(loss1new(0)-loss1old(0));
+		loglikdiff(0) = -w[0]*(loss2new(0)-loss2old(0))-w[1]*(loss1new(0)-loss1old(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2],0)*R::dnorm(theta1new(0),normprior[3],normprior[4],0)+R::dnorm(theta1new(0),normprior[1],normprior[2],0)*R::dnorm(theta0new(0),normprior[3],normprior[4],0))/(R::dnorm(theta0old(0),normprior[1],normprior[2],0)*R::dnorm(theta1old(0),normprior[3],normprior[4],0)+R::dnorm(theta1old(0),normprior[1],normprior[2],0)*R::dnorm(theta0old(0),normprior[3],normprior[4],0))), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {

@@ -11,8 +11,8 @@ rcpp_parallel_yi <- function(nn, data, nnp, priordata, priorweight, thetaboot, b
     .Call(`GPCYI_rcpp_parallel_yi`,  nn, data, nnp, priordata, priorweight, thetaboot, bootmean0, bootmean1, databoot, scheduleLen, priorSched, alpha, M_samp, B_resamp, w)   
 }
 
-rcpp_parallel_smooth_yi <- function(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w){
-    .Call(`GPCYI_rcpp_parallel_smooth_yi`,  nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w)   
+rcpp_parallel_smooth_yi <- function(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w){
+    .Call(`GPCYI_rcpp_parallel_smooth_yi`,  nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w)   
 }
 
 

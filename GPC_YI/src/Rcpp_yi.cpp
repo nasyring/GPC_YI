@@ -765,10 +765,10 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 			prop1(0) = propSched(j,3);	
 		}		
 	}
-	if(w(0)>1.0){
+	if(w0>1.0){
 		prop0(0) = propSched(0,1);	
 	}
-	if(w(1)>1.0){
+	if(w1>1.0){
 		prop1(0) = propSched(0,3);	
 	}
 
@@ -960,17 +960,17 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 
 	
 	for(int j=0; j<sN; j++){
-		if(w(0)<=propSched(j,0)){
+		if(w0<=propSched(j,0)){
 			prop0(0) = propSched(j,1);	
 		}
-		if(w(1)<=propSched(j,2)){
+		if(w1<=propSched(j,2)){
 			prop1(0) = propSched(j,3);	
 		}		
 	}
-	if(w(0)>1.0){
+	if(w0>1.0){
 		prop0(0) = propSched(0,1);	
 	}
-	if(w(1)>1.0){
+	if(w1>1.0){
 		prop1(0) = propSched(0,3);	
 	}
 

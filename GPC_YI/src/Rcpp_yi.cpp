@@ -943,6 +943,8 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	NumericVector postsamples1(M,0.0);
 	NumericVector propsamples0(M,0.0);
 	NumericVector propsamples1(M,0.0);
+	NumericVector matdiffs(M,0.0);
+	NumericVector matdiffs1(M,0.0);
 	NumericVector logpost(M,0.0);
 	NumericVector l0(1,0.0);
 	NumericVector l1(1,0.0);
@@ -995,7 +997,6 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 		
 		loss1new(0) = 0.0;
 		loss2new(0) = 0.0;
-		loglikdiff(0) = 0.0;
 		for(int k=0; k<n; k++){
 			z1 = data1(k,0)*(data1(k,1)-theta0new(0));
 			loss1temp(0)=0;
@@ -1015,10 +1016,13 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			}
 			loss2new(0) = loss2new(0) + loss2temp(0);
 		}
-
+		loglikdiff(0) = 0.0;
 		loglikdiff(0) = -w0*(loss2new(0)-loss2old(0))-w1*(loss1new(0)-loss1old(0));
+		//loglikdiff1(0) = R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false);
 		loglikdiff1(0) = (R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false))/(R::dnorm(theta0old(0),normprior[1],normprior[2],false)*R::dnorm(theta1old(0),normprior[3],normprior[4],false)+R::dnorm(theta1old(0),normprior[1],normprior[2],false)*R::dnorm(theta0old(0),normprior[3],normprior[4],false));
 		//loglikdiff1(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false))/(R::dnorm(theta0old(0),normprior[1],normprior[2],false)*R::dnorm(theta1old(0),normprior[3],normprior[4],false)+R::dnorm(theta1old(0),normprior[1],normprior[2],false)*R::dnorm(theta0old(0),normprior[3],normprior[4],false))), 1.0);
+		matdiffs(j) = loglikdiff(0);
+		matdiffs1(j) = loglikdiff1(0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
@@ -1049,7 +1053,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	u1[0] = postsamples1(M*.975-1);
 
 	acc(0) = acc(0)/M;
-	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("propsamples0") = propsamples0, Rcpp::Named("propsamples1") = propsamples1, Rcpp::Named("logpost") = logpost, Rcpp::Named("loglikdiff") = loglikdiff, Rcpp::Named("loglikdiff1") = loglikdiff1);
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("propsamples0") = propsamples0, Rcpp::Named("propsamples1") = propsamples1, Rcpp::Named("logpost") = logpost, Rcpp::Named("loglikdiff") = loglikdiff, Rcpp::Named("loglikdiff1") = loglikdiff1, Rcpp::Named("matdiffs") = matdiffs, Rcpp::Named("matdiffs1") = matdiffs1);
 
 	return result;
 }

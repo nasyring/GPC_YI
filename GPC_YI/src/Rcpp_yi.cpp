@@ -1017,9 +1017,9 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			loss2new(0) = loss2new(0) + loss2temp(0);
 		}
 		loglikdiff(0) = 0.0;
-		loglikdiff(0) = -w0*(loss2new(0)-loss2old(0))-w1*(loss1new(0)-loss1old(0));
-		//loglikdiff1(0) = R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false);
-		loglikdiff1(0) = (R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false))/(R::dnorm(theta0old(0),normprior[1],normprior[2],false)*R::dnorm(theta1old(0),normprior[3],normprior[4],false)+R::dnorm(theta1old(0),normprior[1],normprior[2],false)*R::dnorm(theta0old(0),normprior[3],normprior[4],false));
+		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0));
+		loglikdiff1(0) = R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false);
+		//loglikdiff1(0) = (R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false))/(R::dnorm(theta0old(0),normprior[1],normprior[2],false)*R::dnorm(theta1old(0),normprior[3],normprior[4],false)+R::dnorm(theta1old(0),normprior[1],normprior[2],false)*R::dnorm(theta0old(0),normprior[3],normprior[4],false));
 		//loglikdiff1(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[1],normprior[2],false)*R::dnorm(theta1new(0),normprior[3],normprior[4],false)+R::dnorm(theta1new(0),normprior[1],normprior[2],false)*R::dnorm(theta0new(0),normprior[3],normprior[4],false))/(R::dnorm(theta0old(0),normprior[1],normprior[2],false)*R::dnorm(theta1old(0),normprior[3],normprior[4],false)+R::dnorm(theta1old(0),normprior[1],normprior[2],false)*R::dnorm(theta0old(0),normprior[3],normprior[4],false))), 1.0);
 		matdiffs(j) = loglikdiff(0);
 		matdiffs1(j) = loglikdiff1(0);

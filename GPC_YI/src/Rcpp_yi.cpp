@@ -720,7 +720,8 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
    	
 	double pi = 3.14159265358979323846;
 	int M = int(M_samp[0]);
-	int n = int(nn[0]);
+	int n1 = int(nn[0]);
+	int n2 = int(nn[1]);
 	int sN = int(scheduleLen[0]);
 	double delta0 = double(ddelta[0]);
 	double delta1 = double(ddelta[1]);
@@ -773,7 +774,7 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 	}
 
 
-	for(int k=0; k<n; k++){
+	for(int k=0; k<n1; k++){
 		z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0old(0));
 		loss1temp(0)=0;
 		if((z1>-delta0/2) && (z1<=delta0/2)){
@@ -782,7 +783,8 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 			loss1temp(0) = 1.0;	
 		}
 		loss1old(0) = loss1old(0) + loss1temp(0);
-		
+	}
+	for(int k=0; k<n2; k++){		
 		z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1old(0));
 		loss2temp(0)=0;
 		if((z2>-delta1/2) && (z2<=delta1/2)){
@@ -802,7 +804,7 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 		loss1new(0) = 0.0;
 		loss2new(0) = 0.0;
 		loglikdiff(0) = 0.0;
-		for(int k=0; k<n; k++){
+		for(int k=0; k<n1; k++){
 			z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0new(0));
 			loss1temp(0)=0;
 			if((z1>-delta0/2) && (z1<=delta0/2)){
@@ -811,7 +813,8 @@ inline std::vector<double> GibbsMCMCsmooth(RVector<double> nn, RMatrix<double> d
 				loss1temp(0) = 1.0;	
 			}
 			loss1new(0) = loss1new(0) + loss1temp(0);
-		
+		}
+		for(int k=0; k<n2; k++){		
 			z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1new(0));
 			loss2temp(0)=0;
 			if((z2>-delta1/2) && (z2<=delta1/2)){
@@ -920,7 +923,8 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	List result;
 	double pi = 3.14159265358979323846;
 	int M = int(M_samp[0]);
-	int n = int(nn[0]);
+	int n1 = int(nn[0]);
+	int n2 = int(nn[1]);
 	int sN = int(scheduleLen[0]);
 	double delta0 = double(ddelta[0]);
 	double delta1 = double(ddelta[1]);
@@ -975,7 +979,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	}
 
 
-	for(int k=0; k<n; k++){
+	for(int k=0; k<n1; k++){
 		z1 = data1(k,0)*(data1(k,1)-theta0old(0));
 		loss1temp(0)=0;
 		if((z1>-delta0/2) && (z1<=delta0/2)){
@@ -984,7 +988,8 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 			loss1temp(0) = 1.0;	
 		}
 		loss1old(0) = loss1old(0) + loss1temp(0);
-		
+	}
+	for(int k=0; k<n2; k++){
 		z2 = data2(k,0)*(data2(k,1)-theta1old(0));
 		loss2temp(0)=0;
 		if((z2>-delta1/2) && (z2<=delta1/2)){
@@ -1004,7 +1009,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 		
 		loss1new(0) = 0.0;
 		loss2new(0) = 0.0;
-		for(int k=0; k<n; k++){
+		for(int k=0; k<n1; k++){
 			z1 = data1(k,0)*(data1(k,1)-theta0new(0));
 			loss1temp(0)=0;
 			if((z1>-delta0/2) && (z1<=delta0/2)){
@@ -1013,7 +1018,8 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 				loss1temp(0) = 1.0;	
 			}
 			loss1new(0) = loss1new(0) + loss1temp(0);
-		
+		}
+		for(int k=0; k<n2; k++){
 			z2 = data2(k,0)*(data2(k,1)-theta1new(0));
 			loss2temp(0)=0;
 			if((z2>-delta1/2) && (z2<=delta1/2)){

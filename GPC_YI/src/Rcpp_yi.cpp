@@ -1068,6 +1068,211 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	return result;
 }
 
+// Proposal Schedule as input
+// [[Rcpp::export]]
+Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericVector bootmean0, NumericVector bootmean1, NumericMatrix priordata1, NumericMatrix priordata2, NumericVector priorweight, NumericVector scheduleLen, NumericMatrix propSched, NumericVector alpha, NumericVector ddelta, NumericVector M_samp, NumericVector w) {
+	
+	List result;
+	double pi = 3.14159265358979323846;
+	int M = int(M_samp[0]);
+	int n1 = int(nn[0]);
+	int n2 = int(nn[1]);
+	int n1p = int(nn[2]);
+	int n2p = int(nn[3]);
+	int sN = int(scheduleLen[0]);
+	double delta0 = double(ddelta[0]);
+	double delta1 = double(ddelta[1]);
+	double w0 = double(w[0]);
+	double w1 = double(w[1]);
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
+	double z1 = 0.0; double z2 = 0.0;
+   	NumericVector theta0old(1,0.0);
+	NumericVector theta0new(1,0.0);
+	NumericVector theta1old(1,0.0);
+	NumericVector theta1new(1,0.0);
+	NumericVector theta0temp(1,0.0);
+	NumericVector theta1temp(1,0.0);
+	NumericVector loglikdiff(1,0.0);
+	NumericVector loglikdiff1(1,0.0);
+	NumericVector loss1temp(1,0.0);
+	NumericVector loss2temp(1,0.0);	
+	NumericVector loss1old(1,0.0);
+	NumericVector loss1new(1,0.0);
+	NumericVector loss2old(1,0.0);
+	NumericVector loss2new(1,0.0);
+	NumericVector loss1tempp(1,0.0);
+	NumericVector loss2tempp(1,0.0);	
+	NumericVector loss1oldp(1,0.0);
+	NumericVector loss1newp(1,0.0);
+	NumericVector loss2oldp(1,0.0);
+	NumericVector loss2newp(1,0.0);
+	NumericVector r(1,0.0);
+	NumericVector uu(1,0.0);
+	NumericVector postsamples0(M,0.0);
+	NumericVector postsamples1(M,0.0);
+	NumericVector logpost(M,0.0);
+	NumericVector l0(1,0.0);
+	NumericVector l1(1,0.0);
+	NumericVector u0(1,0.0);
+	NumericVector u1(1,0.0);
+	theta0old(0) = bootmean0(0);
+	theta1old(0) = bootmean1(0);
+	NumericVector acc(1, 0.0);
+
+
+
+	
+	for(int j=0; j<sN; j++){
+		if(w0<=propSched(j,0)){
+			prop0(0) = propSched(j,1);	
+		}
+		if(w1<=propSched(j,2)){
+			prop1(0) = propSched(j,3);	
+		}		
+	}
+	if(w0>1.0){
+		prop0(0) = propSched(0,1);	
+	}
+	if(w1>1.0){
+		prop1(0) = propSched(0,3);	
+	}
+	
+	for(int k=0; k<n1; k++){
+		z1 = data1(k,0)*(data1(k,1)-theta0old(0));
+		loss1temp(0)=0;
+		if((z1>-delta0/2) && (z1<=delta0/2)){
+			loss1temp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+		}else if(z1<0){
+			loss1temp(0) = 1.0;	
+		}
+		loss1old(0) = loss1old(0) + loss1temp(0);
+	}
+	for(int k=0; k<n2; k++){
+		z2 = data2(k,0)*(data2(k,1)-theta1old(0));
+		loss2temp(0)=0;
+		if((z2>-delta1/2) && (z2<=delta1/2)){
+			loss2temp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+		}else if(z2<0){
+			loss2temp(0) = 1.0;	
+		}
+		loss2old(0) = loss2old(0) + loss2temp(0);
+	}
+
+
+	for(int k=0; k<n1p; k++){
+		z1 = priordata1(k,0)*(priordata1(k,1)-theta0old(0));
+		loss1tempp(0)=0;
+		if((z1>-delta0/2) && (z1<=delta0/2)){
+			loss1tempp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+		}else if(z1<0){
+			loss1tempp(0) = 1.0;	
+		}
+		loss1oldp(0) = loss1oldp(0) + loss1tempp(0);
+	}
+	for(int k=0; k<n2p; k++){
+		z2 = priordata2(k,0)*(priordata2(k,1)-theta1old(0));
+		loss2tempp(0)=0;
+		if((z2>-delta1/2) && (z2<=delta1/2)){
+			loss2tempp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+		}else if(z2<0){
+			loss2tempp(0) = 1.0;	
+		}
+		loss2oldp(0) = loss2oldp(0) + loss2tempp(0);
+	}
+
+	for(int j=0; j<M; j++) {
+		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1temp(0) = R::rnorm(theta1old(0), prop1(0));
+		theta0new(0) = min(theta0temp(0), theta1temp(0));
+		theta1new(0) = max(theta0temp(0), theta1temp(0));
+
+		
+		loss1new(0) = 0.0;
+		loss2new(0) = 0.0;
+		loss1newp(0) = 0.0;
+		loss2newp(0) = 0.0;
+		for(int k=0; k<n1; k++){
+			z1 = data1(k,0)*(data1(k,1)-theta0new(0));
+			loss1temp(0)=0;
+			if((z1>-delta0/2) && (z1<=delta0/2)){
+				loss1temp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+			}else if(z1<0){
+				loss1temp(0) = 1.0;	
+			}
+			loss1new(0) = loss1new(0) + loss1temp(0);
+		}
+		for(int k=0; k<n2; k++){
+			z2 = data2(k,0)*(data2(k,1)-theta1new(0));
+			loss2temp(0)=0;
+			if((z2>-delta1/2) && (z2<=delta1/2)){
+				loss2temp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+			}else if(z2<0){
+				loss2temp(0) = 1.0;	
+			}
+			loss2new(0) = loss2new(0) + loss2temp(0);
+		}
+		for(int k=0; k<n1p; k++){
+			z1 = priordata1(k,0)*(priordata1(k,1)-theta0new(0));
+			loss1tempp(0)=0;
+			if((z1>-delta0/2) && (z1<=delta0/2)){
+				loss1tempp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+			}else if(z1<0){
+				loss1tempp(0) = 1.0;	
+			}
+			loss1newp(0) = loss1newp(0) + loss1tempp(0);
+		}
+		for(int k=0; k<n2p; k++){
+			z2 = priordata2(k,0)*(priordata2(k,1)-theta1new(0));
+			loss2tempp(0)=0;
+			if((z2>-delta1/2) && (z2<=delta1/2)){
+				loss2tempp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+			}else if(z2<0){
+				loss2tempp(0) = 1.0;	
+			}
+			loss2newp(0) = loss2newp(0) + loss2tempp(0);
+		}
+		loglikdiff(0) = 0.0;
+		loglikdiff1(0) = 0.0;
+		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -w1*priorweight[0]*(loss2newp(0)-loss2oldp(0))-w0*priorweight[0]*(loss1newp(0)-loss1oldp(0))
+		loglikdiff1(0) = fmin(std::exp(loglikdiff(0));
+		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff1(0)) {
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			logpost(j) = log(loglikdiff(0));
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			loss2old(0) = loss2new(0);
+			loss1old(0) = loss1new(0);
+			loss2oldp(0) = loss2newp(0);
+			loss1oldp(0) = loss1newp(0);
+			acc(0) = acc(0)+1;
+		}
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			if(j>0){
+				logpost(j) = logpost(j-1);
+			}else {
+				logpost(j) = logpost(0);	
+			}
+		}
+	}	
+
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
+	l0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.975-1);
+	l1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.975-1);
+
+	acc(0) = acc(0)/M;
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
+
+	return result;
+}
+
 
 
 // Proposal Schedule as input

@@ -2724,6 +2724,75 @@ NumericVector rcpp_parallel_smooth_yi(NumericVector nn, NumericMatrix data1, Num
 }
 	
 	
+				      
+// with prior data
+				   
+struct GPCYI_yi_mcmcp_smooth_parallel : public Worker {
+	
+	const RVector<double> nn;
+	const RMatrix<double> data1;
+	const RMatrix<double> data2;
+	const RMatrix<double> thetaboot;
+	const RVector<double> bootmean0;
+	const RVector<double> bootmean1;
+	const RMatrix<double> databoot1;
+	const RMatrix<double> databoot2;
+	const RMatrix<double> priorata1;
+	const RMatrix<double> priordata2;
+	const RVector<double> priorweight;
+	const RVector<double> scheduleLen;
+	const RMatrix<double> propSched;
+	const RVector<double> ddelta;
+	const RVector<double> alpha;
+	const RVector<double> M_samp;
+	const RVector<double> B_resamp;
+	const RVector<double> w;
+	RMatrix<double> cover;
+	std::vector<double> temp;
+
+   // initialize with source and destination
+   GPCYI_yi_mcmcp_smooth_parallel(const NumericVector nn, const NumericMatrix data1, const NumericMatrix data2, const NumericMatrix thetaboot,
+	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot1, const NumericMatrix databoot2, const NumericMatrix priordata1, const NumericMatrix priordata2, const NumericVector priorweight, const NumericVector scheduleLen, const NumericMatrix propSched,
+	const NumericVector ddelta, const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp, const NumericVector w, NumericMatrix cover, std::vector<double> temp) 
+			: nn(nn), data1(data1), data2(data2), thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot1(databoot1), databoot2(databoot2), priordata1(priordata1), priordata2(priordata2), priorweight(priorweight), scheduleLen(scheduleLen), propSched(propSched), ddelta(ddelta), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover), temp(temp) {}   
+
+   // operator
+void operator()(std::size_t begin, std::size_t end) {
+		for (std::size_t i = begin; i < end; i++) {
+			temp = GibbsMCMCpsmooth(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priordata1, priordata2, priorweight, scheduleLen, propSched, ddelta, alpha, M_samp, w, i);	
+			cover(i,0) = temp[0];cover(i,1) = temp[1];
+		}
+	}
+};
+
+
+// [[Rcpp::export]]
+NumericVector rcpp_parallel_smoothp_yi(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
+	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericMatrix priordata1, NumericMatrix priordata2, NumericVector priorweight, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
+	NumericVector w) {
+		
+   int B = int(B_resamp[0]);
+   // allocate the matrix we will return
+   NumericMatrix cover(B,2); 
+   std::vector<double> temp;
+   // create the worker
+   GPCYI_yi_mcmcp_smooth_parallel gpcWorker(nn, data1, data2, thetaboot, bootmean0,
+	bootmean1, databoot1, databoot2, priordata1, priordata2, priorweight, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, 
+	w, cover, temp);
+     
+   // call it with parallelFor
+   
+   parallelFor(0, B, gpcWorker);
+
+   return cover;
+}
+	
+				      
+				      
+				      
+				      
+				      
+				      
 
 // [[Rcpp::export]]
 Rcpp::List GPCYI_yi_parallel(SEXP & nn, SEXP & data, SEXP & nnp, SEXP & priordata, SEXP & priorweight, SEXP & theta_boot, SEXP & data_boot, SEXP & scheduleLen, SEXP & priorSched, SEXP & alpha, SEXP & M_samp, SEXP & B_resamp) {

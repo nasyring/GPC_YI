@@ -1338,6 +1338,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 	double delta1 = double(ddelta[1]);
 	double w0 = double(w[0]);
 	double w1 = double(w[1]);
+	double pw = double(priorweight[0]);
    	NumericVector prop0(1,0.0);
    	NumericVector prop1(1,0.0);
 	double z1 = 0.0; double z2 = 0.0;
@@ -1434,7 +1435,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}
 		loss2oldp(0) = loss2oldp(0) + loss2tempp(0);
 	}
-/*
+
 	for(int j=0; j<M; j++) {
 		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
 		theta1temp(0) = R::rnorm(theta1old(0), prop1(0));
@@ -1488,7 +1489,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}
 		loglikdiff(0) = 0.0;
 		loglikdiff1(0) = 0.0;
-		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -w1*priorweight[0]*(loss2newp(0)-loss2oldp(0))-w0*priorweight[0]*(loss1newp(0)-loss1oldp(0));
+		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -w1*pw*(loss2newp(0)-loss2oldp(0))-w0*pw*(loss1newp(0)-loss1oldp(0));
 		loglikdiff1(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff1(0)) {
@@ -1523,8 +1524,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 
 	acc(0) = acc(0)/M;
 	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
-*/
-	result = Rcpp::List::create(Rcpp::Named("loss1oldp") = loss1oldp, Rcpp::Named("loss2oldp") = loss2oldp);
+
 
 	return result;
 }

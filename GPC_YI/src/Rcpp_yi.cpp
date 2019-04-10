@@ -2737,7 +2737,7 @@ struct GPCYI_yi_mcmcp_smooth_parallel : public Worker {
 	const RVector<double> bootmean1;
 	const RMatrix<double> databoot1;
 	const RMatrix<double> databoot2;
-	const RMatrix<double> priorata1;
+	const RMatrix<double> priordata1;
 	const RMatrix<double> priordata2;
 	const RVector<double> priorweight;
 	const RVector<double> scheduleLen;

@@ -1488,7 +1488,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}
 		loglikdiff(0) = 0.0;
 		loglikdiff1(0) = 0.0;
-		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -w1*priorweight[0]*(loss2newp(0)-loss2oldp(0))-w0*priorweight[0]*(loss1newp(0)-loss1oldp(0))
+		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -w1*priorweight[0]*(loss2newp(0)-loss2oldp(0))-w0*priorweight[0]*(loss1newp(0)-loss1oldp(0));
 		loglikdiff1(0) = fmin(std::exp(loglikdiff(0));
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff1(0)) {

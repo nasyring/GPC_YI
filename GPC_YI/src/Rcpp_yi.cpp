@@ -1554,7 +1554,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 			loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y2p(0);
 		}
 	}
-/*
+
 	for(int j=0; j<M; j++) {
 		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
 		theta1temp(0) = R::rnorm(theta1old(0), prop1(0));
@@ -1624,7 +1624,7 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}
 		loglikdiff(0) = 0.0;
 		loglikdiff1(0) = 0.0;
-		loglikdiff(0) = -n2*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0)) -n2p*pw*(loss2newp(0)-loss2oldp(0))-n1p*pw*(loss1newp(0)-loss1oldp(0));
+		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -pw*(loss2newp(0)-loss2oldp(0))-pw*(loss1newp(0)-loss1oldp(0));
 		loglikdiff1(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff1(0)) {

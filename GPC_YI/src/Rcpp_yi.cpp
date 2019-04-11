@@ -1118,6 +1118,14 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 	NumericVector u1(1,0.0);
 	theta0old(0) = thetaboot(i,0);
 	theta1old(0) = thetaboot(i,1);
+	NumericVector d1y1(1,0.0);
+	NumericVector d1y2(1,0.0);
+	NumericVector d2y1(1,0.0);
+	NumericVector d2y2(1,0.0);
+	NumericVector d1y1p(1,0.0);
+	NumericVector d1y2p(1,0.0);
+	NumericVector d2y1p(1,0.0);
+	NumericVector d2y2p(1,0.0);
 
 
 
@@ -1136,7 +1144,34 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 	if(w1>1.0){
 		prop1(0) = propSched(0,3);	
 	}
-
+	for(int k=0; k<n1; k++){
+		if(databoot1(k,2*i)==-1){
+			d1y1(0) = d1y1(0) + 1.0;
+		}else {
+			d1y2(0) = d1y2(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n2; k++){
+		if(databoot2(k,2*i)==-1){
+			d2y1(0) = d2y1(0) + 1.0;
+		}else {
+			d2y2(0) = d2y2(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n1p; k++){
+		if(priordata1(k,0)==-1){
+			d1y1p(0) = d1y1p(0) + 1.0;
+		}else {
+			d1y2p(0) = d1y2p(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n2p; k++){
+		if(priordata2(k,0)==-1){
+			d2y1p(0) = d2y1p(0) + 1.0;
+		}else {
+			d2y2p(0) = d2y2p(0) + 1.0;	
+		}
+	}
 
 	for(int k=0; k<n1; k++){
 		z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0old(0));
@@ -1146,7 +1181,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 		}else if(z1<0){
 			loss1temp(0) = 1.0;	
 		}
-		loss1old(0) = loss1old(0) + loss1temp(0);
+		if(databoot1(k,2*i)==-1){
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+		}else {
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+		}
 	}
 	for(int k=0; k<n2; k++){		
 		z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1old(0));
@@ -1156,7 +1195,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 		}else if(z2<0){
 			loss2temp(0) = 1.0;	
 		}
-		loss2old(0) = loss2old(0) + loss2temp(0);
+		if(databoot2(k,2*i)==-1){
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+		}else {
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+		}
 	}
 	
 	for(int k=0; k<n1p; k++){
@@ -1167,7 +1210,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 		}else if(z1<0){
 			loss1tempp(0) = 1.0;	
 		}
-		loss1oldp(0) = loss1oldp(0) + loss1tempp(0);
+		if(priordata1(k,0)==-1){
+			loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y1p(0);
+		}else {
+			loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y2p(0);
+		}
 	}
 	for(int k=0; k<n2p; k++){		
 		z2 = priordata2(k,0)*(priordata2(k,1)-theta1old(0));
@@ -1177,7 +1224,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 		}else if(z2<0){
 			loss2tempp(0) = 1.0;	
 		}
-		loss2oldp(0) = loss2oldp(0) + loss2tempp(0);
+		if(priordata2(k,0)==-1){
+			loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y1p(0);
+		}else {
+			loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y2p(0);
+		}
 	}
 
 	for(int j=0; j<M; j++) {
@@ -1199,7 +1250,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 			}else if(z1<0){
 				loss1temp(0) = 1.0;	
 			}
-			loss1new(0) = loss1new(0) + loss1temp(0);
+			if(databoot1(k,2*i)==-1){
+				loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+			}else {
+				loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+			}
 		}
 		for(int k=0; k<n2; k++){		
 			z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1new(0));
@@ -1209,7 +1264,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 			}else if(z2<0){
 				loss2temp(0) = 1.0;	
 			}
-			loss2new(0) = loss2new(0) + loss2temp(0);
+			if(databoot2(k,2*i)==-1){
+				loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+			}else {
+				loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+			}
 		}
 		
 		for(int k=0; k<n1p; k++){
@@ -1220,7 +1279,11 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 			}else if(z1<0){
 				loss1tempp(0) = 1.0;	
 			}
-			loss1newp(0) = loss1newp(0) + loss1tempp(0);
+			if(priordata1(k,0)==-1){
+				loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y1p(0);
+			}else {
+				loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y2p(0);
+			}
 		}
 		for(int k=0; k<n2p; k++){		
 			z2 = priordata2(k,0)*(priordata2(k,1)-theta1new(0));
@@ -1230,10 +1293,14 @@ inline std::vector<double> GibbsMCMCpsmooth(RVector<double> nn, RMatrix<double> 
 			}else if(z2<0){
 				loss2tempp(0) = 1.0;	
 			}
-			loss2newp(0) = loss2newp(0) + loss2tempp(0);
+			if(priordata2(k,0)==-1){
+				loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y1p(0);
+			}else {
+				loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y2p(0);
+			}
 		}
 
-		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0))-w1*priorweight[0]*(loss2newp(0)-loss2oldp(0))-w0*priorweight[0]*(loss1newp(0)-loss1oldp(0));
+		loglikdiff(0) = -n1*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0))-n1*w1*priorweight[0]*(loss2newp(0)-loss2oldp(0))-n1*w0*priorweight[0]*(loss1newp(0)-loss1oldp(0));
 		loglikdiff(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
@@ -1374,7 +1441,14 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 	theta0old(0) = bootmean0(0);
 	theta1old(0) = bootmean1(0);
 	NumericVector acc(1, 0.0);
-
+	NumericVector d1y1(1,0.0);
+	NumericVector d1y2(1,0.0);
+	NumericVector d2y1(1,0.0);
+	NumericVector d2y2(1,0.0);
+	NumericVector d1y1p(1,0.0);
+	NumericVector d1y2p(1,0.0);
+	NumericVector d2y1p(1,0.0);
+	NumericVector d2y2p(1,0.0);
 
 
 	
@@ -1394,6 +1468,35 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 	}
 	
 	for(int k=0; k<n1; k++){
+		if(data1(k,0)==-1){
+			d1y1(0) = d1y1(0) + 1.0;
+		}else {
+			d1y2(0) = d1y2(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n2; k++){
+		if(data2(k,0)==-1){
+			d2y1(0) = d2y1(0) + 1.0;
+		}else {
+			d2y2(0) = d2y2(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n1p; k++){
+		if(priordata1(k,0)==-1){
+			d1y1p(0) = d1y1p(0) + 1.0;
+		}else {
+			d1y2p(0) = d1y2p(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n2p; k++){
+		if(priordata2(k,0)==-1){
+			d2y1p(0) = d2y1p(0) + 1.0;
+		}else {
+			d2y2p(0) = d2y2p(0) + 1.0;	
+		}
+	}
+	
+	for(int k=0; k<n1; k++){
 		z1 = data1(k,0)*(data1(k,1)-theta0old(0));
 		loss1temp(0)=0;
 		if((z1>-delta0/2) && (z1<=delta0/2)){
@@ -1401,7 +1504,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}else if(z1<0){
 			loss1temp(0) = 1.0;	
 		}
-		loss1old(0) = loss1old(0) + loss1temp(0);
+		if(data1(k,0)==-1){
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+		}else {
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+		}
 	}
 	for(int k=0; k<n2; k++){
 		z2 = data2(k,0)*(data2(k,1)-theta1old(0));
@@ -1411,7 +1518,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}else if(z2<0){
 			loss2temp(0) = 1.0;	
 		}
-		loss2old(0) = loss2old(0) + loss2temp(0);
+		if(data2(k,0)==-1){
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+		}else {
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+		}
 	}
 
 
@@ -1423,7 +1534,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}else if(z1<0){
 			loss1tempp(0) = 1.0;	
 		}
-		loss1oldp(0) = loss1oldp(0) + loss1tempp(0);
+		if(priordata1(k,0)==-1){
+			loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y1p(0);
+		}else {
+			loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y2p(0);
+		}
 	}
 	for(int k=0; k<n2p; k++){
 		z2 = priordata2(k,0)*(priordata2(k,1)-theta1old(0));
@@ -1433,7 +1548,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 		}else if(z2<0){
 			loss2tempp(0) = 1.0;	
 		}
-		loss2oldp(0) = loss2oldp(0) + loss2tempp(0);
+		if(priordata2(k,0)==-1){
+			loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y1p(0);
+		}else {
+			loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y2p(0);
+		}
 	}
 
 	for(int j=0; j<M; j++) {
@@ -1455,7 +1574,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 			}else if(z1<0){
 				loss1temp(0) = 1.0;	
 			}
-			loss1new(0) = loss1new(0) + loss1temp(0);
+			if(data1(k,0)==-1){
+				loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+			}else {
+				loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+			}
 		}
 		for(int k=0; k<n2; k++){
 			z2 = data2(k,0)*(data2(k,1)-theta1new(0));
@@ -1465,7 +1588,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 			}else if(z2<0){
 				loss2temp(0) = 1.0;	
 			}
-			loss2new(0) = loss2new(0) + loss2temp(0);
+			if(data2(k,0)==-1){
+				loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+			}else {
+				loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+			}
 		}
 		for(int k=0; k<n1p; k++){
 			z1 = priordata1(k,0)*(priordata1(k,1)-theta0new(0));
@@ -1475,7 +1602,11 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 			}else if(z1<0){
 				loss1tempp(0) = 1.0;	
 			}
-			loss1newp(0) = loss1newp(0) + loss1tempp(0);
+			if(priordata1(k,0)==-1){
+				loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y1p(0);
+			}else {
+				loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y2p(0);
+			}
 		}
 		for(int k=0; k<n2p; k++){
 			z2 = priordata2(k,0)*(priordata2(k,1)-theta1new(0));
@@ -1485,11 +1616,15 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 			}else if(z2<0){
 				loss2tempp(0) = 1.0;	
 			}
-			loss2newp(0) = loss2newp(0) + loss2tempp(0);
+			if(priordata2(k,0)==-1){
+				loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y1p(0);
+			}else {
+				loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y2p(0);
+			}
 		}
 		loglikdiff(0) = 0.0;
 		loglikdiff1(0) = 0.0;
-		loglikdiff(0) = -w1*(loss2new(0)-loss2old(0))-w0*(loss1new(0)-loss1old(0)) -w1*pw*(loss2newp(0)-loss2oldp(0))-w0*pw*(loss1newp(0)-loss1oldp(0));
+		loglikdiff(0) = -n1*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0)) -n1*w1*pw*(loss2newp(0)-loss2oldp(0))-n1*w0*pw*(loss1newp(0)-loss1oldp(0));
 		loglikdiff1(0) = fmin(std::exp(loglikdiff(0)), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff1(0)) {

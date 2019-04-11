@@ -1575,9 +1575,9 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 				loss1temp(0) = 1.0;	
 			}
 			if(data1(k,0)==-1){
-				loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+				loss1new(0) = loss1new(0) + loss1temp(0)/d1y1(0);
 			}else {
-				loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+				loss1new(0) = loss1new(0) + loss1temp(0)/d1y2(0);
 			}
 		}
 		for(int k=0; k<n2; k++){
@@ -1589,9 +1589,9 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 				loss2temp(0) = 1.0;	
 			}
 			if(data2(k,0)==-1){
-				loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+				loss2new(0) = loss2new(0) + loss2temp(0)/d2y1(0);
 			}else {
-				loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+				loss2new(0) = loss2new(0) + loss2temp(0)/d2y2(0);
 			}
 		}
 		for(int k=0; k<n1p; k++){
@@ -1603,9 +1603,9 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 				loss1tempp(0) = 1.0;	
 			}
 			if(priordata1(k,0)==-1){
-				loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y1p(0);
+				loss1newp(0) = loss1newp(0) + loss1tempp(0)/d1y1p(0);
 			}else {
-				loss1oldp(0) = loss1oldp(0) + loss1tempp(0)/d1y2p(0);
+				loss1newp(0) = loss1newp(0) + loss1tempp(0)/d1y2p(0);
 			}
 		}
 		for(int k=0; k<n2p; k++){
@@ -1617,9 +1617,9 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 				loss2tempp(0) = 1.0;	
 			}
 			if(priordata2(k,0)==-1){
-				loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y1p(0);
+				loss2newp(0) = loss2newp(0) + loss2tempp(0)/d2y1p(0);
 			}else {
-				loss2oldp(0) = loss2oldp(0) + loss2tempp(0)/d2y2p(0);
+				loss2newp(0) = loss2newp(0) + loss2tempp(0)/d2y2p(0);
 			}
 		}
 		loglikdiff(0) = 0.0;

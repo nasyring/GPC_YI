@@ -1659,9 +1659,8 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 
 	acc(0) = acc(0)/M;
 	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
-*/
-	result = Rcpp::List::create(Rcpp::Named("loss1old") = loss1old, Rcpp::Named("loss2old") = loss2old, Rcpp::Named("loss1oldp") = loss1oldp, Rcpp::Named("loss2oldp") = loss2oldp);
 
+	
 	return result;
 }
 

@@ -3398,7 +3398,7 @@ struct GPCYI_yi_mcmc3_smooth_parallel : public Worker {
    // operator
 void operator()(std::size_t begin, std::size_t end) {
 		for (std::size_t i = begin; i < end; i++) {
-			temp = GibbsMCMC3smooth(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priorsched, scheduleLen, propSched, ddelta, alpha, M_samp, w, i);	
+			temp = GibbsMCMC3loopsmooth(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priorsched, scheduleLen, propSched, ddelta, alpha, M_samp, w, i);	
 			cover(i,0) = temp[0];cover(i,1) = temp[1];
 		}
 	}

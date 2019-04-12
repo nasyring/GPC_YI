@@ -15,6 +15,10 @@ rcpp_parallel_smooth_yi <- function(nn, data1, data2, thetaboot, bootmean0, boot
     .Call(`GPCYI_rcpp_parallel_smooth_yi`,  nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, normprior, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w)   
 }
 
+rcpp_parallel_smooth3_yi <- function(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priorsched, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w){
+    .Call(`GPCYI_rcpp_parallel_smooth3_yi`,  nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priorsched, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w)   
+}
+
 rcpp_parallel_smoothp_yi <- function(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priordata1, priordata2, priorweight, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w){
     .Call(`GPCYI_rcpp_parallel_smoothp_yi`,  nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priordata1, priordata2, priorweight, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, w)   
 }
@@ -26,6 +30,10 @@ GibbsMCMC2 <- function(nn, data, nnp, priordata, priorweight, thetaboot, bootmea
 
 GibbsMCMC2smooth <- function(nn, data1, data2, bootmean0, bootmean1, normprior, scheduleLen, propSched, alpha, ddelta, M_samp, w){
     .Call(`GPCYI_GibbsMCMC2smooth`, nn, data1, data2, bootmean0, bootmean1, normprior, scheduleLen, propSched, alpha, ddelta, M_samp, w)    
+}
+
+GibbsMCMC3smooth <- function(nn, data1, data2, bootmean0, bootmean1, priorsched, scheduleLen, propSched, alpha, ddelta, M_samp, w){
+    .Call(`GPCYI_GibbsMCMC3smooth`, nn, data1, data2, bootmean0, bootmean1, priorsched, scheduleLen, propSched, alpha, ddelta, M_samp, w)    
 }
 
 GibbsMCMCp2smooth <- function(nn, data1, data2, bootmean0, bootmean1, priordata1, priordata2, priorweight, scheduleLen, propSched, alpha, ddelta, M_samp, w){

@@ -1675,8 +1675,6 @@ inline std::vector<double> GibbsMCMC3loopsmooth(RVector<double> nn, RMatrix<doub
 	int M = int(M_samp[0]);
 	int n1 = int(nn[0]);
 	int n2 = int(nn[1]);
-	int n1p = int(nn[2]);
-	int n2p = int(nn[3]);
 	int sN = int(scheduleLen[0]);
 	double delta0 = double(ddelta[0]);
 	double delta1 = double(ddelta[1]);
@@ -1821,7 +1819,7 @@ inline std::vector<double> GibbsMCMC3loopsmooth(RVector<double> nn, RMatrix<doub
 		
 
 		loglikdiff(0) = -n2*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0));
-		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[0],normprior[1],0)*R::dnorm(theta1new(0),normprior[2],normprior[3],0)+R::dnorm(theta1new(0),normprior[0],normprior[1],0)*R::dnorm(theta0new(0),normprior[2],normprior[3],0))/(R::dnorm(theta0old(0),normprior[0],normprior[1],0)*R::dnorm(theta1old(0),normprior[2],normprior[3],0)+R::dnorm(theta1old(0),normprior[0],normprior[1],0)*R::dnorm(theta0old(0),normprior[2],normprior[3],0))), 1.0);
+		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),priorsched[0],priorsched[1],0)*R::dnorm(theta1new(0),priorsched[2],priorsched[3],0)+R::dnorm(theta1new(0),priorsched[0],priorsched[1],0)*R::dnorm(theta0new(0),priorsched[2],priorsched[3],0))/(R::dnorm(theta0old(0),priorsched[0],priorsched[1],0)*R::dnorm(theta1old(0),priorsched[2],priorsched[3],0)+R::dnorm(theta1old(0),priorsched[0],priorsched[1],0)*R::dnorm(theta0old(0),priorsched[2],priorsched[3],0))), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff(0)) {
 			postsamples0(j) = theta0new(0);
@@ -1918,14 +1916,11 @@ Rcpp::List GibbsMCMC3smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 	int M = int(M_samp[0]);
 	int n1 = int(nn[0]);
 	int n2 = int(nn[1]);
-	int n1p = int(nn[2]);
-	int n2p = int(nn[3]);
 	int sN = int(scheduleLen[0]);
 	double delta0 = double(ddelta[0]);
 	double delta1 = double(ddelta[1]);
 	double w0 = double(w[0]);
 	double w1 = double(w[1]);
-
    	NumericVector prop0(1,0.0);
    	NumericVector prop1(1,0.0);
 	double z1 = 0.0; double z2 = 0.0;
@@ -2067,7 +2062,7 @@ Rcpp::List GibbsMCMC3smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 		loglikdiff(0) = 0.0;
 		loglikdiff1(0) = 0.0;
 		loglikdiff(0) = -n2*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0));
-		loglikdiff1(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[0],normprior[1],0)*R::dnorm(theta1new(0),normprior[2],normprior[3],0)+R::dnorm(theta1new(0),normprior[0],normprior[1],0)*R::dnorm(theta0new(0),normprior[2],normprior[3],0))/(R::dnorm(theta0old(0),normprior[0],normprior[1],0)*R::dnorm(theta1old(0),normprior[2],normprior[3],0)+R::dnorm(theta1old(0),normprior[0],normprior[1],0)*R::dnorm(theta0old(0),normprior[2],normprior[3],0))), 1.0);
+		loglikdiff1(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),priorsched[0],priorsched[1],0)*R::dnorm(theta1new(0),priorsched[2],priorsched[3],0)+R::dnorm(theta1new(0),priorsched[0],priorsched[1],0)*R::dnorm(theta0new(0),priorsched[2],priorsched[3],0))/(R::dnorm(theta0old(0),priorsched[0],priorsched[1],0)*R::dnorm(theta1old(0),priorsched[2],priorsched[3],0)+R::dnorm(theta1old(0),priorsched[0],priorsched[1],0)*R::dnorm(theta0old(0),priorsched[2],priorsched[3],0))), 1.0);
 		uu[0] = R::runif(0.0,1.0);
 		if(uu(0) <= loglikdiff1(0)) {
 			postsamples0(j) = theta0new(0);

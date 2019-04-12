@@ -1666,6 +1666,446 @@ Rcpp::List GibbsMCMCp2smooth(NumericVector nn, NumericMatrix data1, NumericMatri
 }
 
 
+inline std::vector<double> GibbsMCMC3loopsmooth(RVector<double> nn, RMatrix<double> data1, RMatrix<double> data2, RMatrix<double> thetaboot,
+	RVector<double> bootmean0, RVector<double> bootmean1, RMatrix<double> databoot1, RMatrix<double> databoot2, 
+	RVector<double> priorsched, RVector<double> scheduleLen, RMatrix<double> propSched, RVector<double> ddelta, RVector<double> alpha, RVector<double> M_samp, 
+	RVector<double> w, std::size_t i) {
+   	
+	double pi = 3.14159265358979323846;
+	int M = int(M_samp[0]);
+	int n1 = int(nn[0]);
+	int n2 = int(nn[1]);
+	int n1p = int(nn[2]);
+	int n2p = int(nn[3]);
+	int sN = int(scheduleLen[0]);
+	double delta0 = double(ddelta[0]);
+	double delta1 = double(ddelta[1]);
+	double w0 = double(w[0]);
+	double w1 = double(w[1]);
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
+	std::vector<double> cov_ind;
+	double z1 = 0.0; double z2 = 0.0;
+   	NumericVector theta0old(1,0.0);
+	NumericVector theta0new(1,0.0);
+	NumericVector theta1old(1,0.0);
+	NumericVector theta1new(1,0.0);
+	NumericVector theta0temp(1,0.0);
+	NumericVector theta1temp(1,0.0);
+	NumericVector loglikdiff(1,0.0);
+	NumericVector loss1temp(1,0.0);
+	NumericVector loss2temp(1,0.0);	
+	NumericVector loss1old(1,0.0);
+	NumericVector loss1new(1,0.0);
+	NumericVector loss2old(1,0.0);
+	NumericVector loss2new(1,0.0);
+	NumericVector r(1,0.0);
+	NumericVector uu(1,0.0);
+	NumericVector postsamples0(M,0.0);
+	NumericVector postsamples1(M,0.0);
+	NumericVector l0(1,0.0);
+	NumericVector l1(1,0.0);
+	NumericVector u0(1,0.0);
+	NumericVector u1(1,0.0);
+	theta0old(0) = thetaboot(i,0);
+	theta1old(0) = thetaboot(i,1);
+	NumericVector d1y1(1,0.0);
+	NumericVector d1y2(1,0.0);
+	NumericVector d2y1(1,0.0);
+	NumericVector d2y2(1,0.0);
+
+
+
+
+	
+	for(int j=0; j<sN; j++){
+		if(w0<=propSched(j,0)){
+			prop0(0) = propSched(j,1);	
+		}
+		if(w1<=propSched(j,2)){
+			prop1(0) = propSched(j,3);	
+		}		
+	}
+	if(w0>1.0){
+		prop0(0) = propSched(0,1);	
+	}
+	if(w1>1.0){
+		prop1(0) = propSched(0,3);	
+	}
+	for(int k=0; k<n1; k++){
+		if(databoot1(k,2*i)==-1){
+			d1y1(0) = d1y1(0) + 1.0;
+		}else {
+			d1y2(0) = d1y2(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n2; k++){
+		if(databoot2(k,2*i)==-1){
+			d2y1(0) = d2y1(0) + 1.0;
+		}else {
+			d2y2(0) = d2y2(0) + 1.0;	
+		}
+	}
+	
+
+	for(int k=0; k<n1; k++){
+		z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0old(0));
+		loss1temp(0)=0;
+		if((z1>-delta0/2) && (z1<=delta0/2)){
+			loss1temp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+		}else if(z1<0){
+			loss1temp(0) = 1.0;	
+		}
+		if(databoot1(k,2*i)==-1){
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+		}else {
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+		}
+	}
+	for(int k=0; k<n2; k++){		
+		z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1old(0));
+		loss2temp(0)=0;
+		if((z2>-delta1/2) && (z2<=delta1/2)){
+			loss2temp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+		}else if(z2<0){
+			loss2temp(0) = 1.0;	
+		}
+		if(databoot2(k,2*i)==-1){
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+		}else {
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+		}
+	}
+	
+	
+
+	for(int j=0; j<M; j++) {
+		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1temp(0) = R::rnorm(theta1old(0), prop1(0));
+		theta0new(0) = min(theta0temp(0), theta1temp(0));
+		theta1new(0) = max(theta0temp(0), theta1temp(0));
+		
+		loss1new(0) = 0.0;
+		loss2new(0) = 0.0;
+		
+		loglikdiff(0) = 0.0;
+		for(int k=0; k<n1; k++){
+			z1 = databoot1(k,2*i)*(databoot1(k,2*i+1)-theta0new(0));
+			loss1temp(0)=0;
+			if((z1>-delta0/2) && (z1<=delta0/2)){
+				loss1temp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+			}else if(z1<0){
+				loss1temp(0) = 1.0;	
+			}
+			if(databoot1(k,2*i)==-1){
+				loss1new(0) = loss1new(0) + loss1temp(0)/d1y1(0);
+			}else {
+				loss1new(0) = loss1new(0) + loss1temp(0)/d1y2(0);
+			}
+		}
+		for(int k=0; k<n2; k++){		
+			z2 = databoot2(k,2*i)*(databoot2(k,2*i+1)-theta1new(0));
+			loss2temp(0)=0;
+			if((z2>-delta1/2) && (z2<=delta1/2)){
+				loss2temp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+			}else if(z2<0){
+				loss2temp(0) = 1.0;	
+			}
+			if(databoot2(k,2*i)==-1){
+				loss2new(0) = loss2new(0) + loss2temp(0)/d2y1(0);
+			}else {
+				loss2new(0) = loss2new(0) + loss2temp(0)/d2y2(0);
+			}
+		}
+		
+		
+
+		loglikdiff(0) = -n2*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0));
+		loglikdiff(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[0],normprior[1],0)*R::dnorm(theta1new(0),normprior[2],normprior[3],0)+R::dnorm(theta1new(0),normprior[0],normprior[1],0)*R::dnorm(theta0new(0),normprior[2],normprior[3],0))/(R::dnorm(theta0old(0),normprior[0],normprior[1],0)*R::dnorm(theta1old(0),normprior[2],normprior[3],0)+R::dnorm(theta1old(0),normprior[0],normprior[1],0)*R::dnorm(theta0old(0),normprior[2],normprior[3],0))), 1.0);
+		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff(0)) {
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			loss2old(0) = loss2new(0);
+			loss1old(0) = loss1new(0);	
+		}
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+		}
+	}	
+/*
+	double templogpost;
+	double tempYI;
+	double temppost0;
+	double temppost1;
+	bool swapped;	
+        for (int j = 0; j < M-1; j++){ 
+		 swapped = false; 
+       		 for (int k = 0; k < M-j-1; k++){  
+           		 if (logpost(k) > logpost(k+1)){ 
+				 swapped = true;
+				 templogpost = logpost(k);
+				 logpost(k) = logpost(k+1);
+				 logpost(k+1) = templogpost;
+				 tempYI = YI(k);
+				 YI(k) = YI(k+1);
+				 YI(k+1) = tempYI;
+				 temppost0 = postsamples0(k);
+				 postsamples0(k) = postsamples0(k+1);
+				 postsamples0(k+1) = temppost0;				 
+				 temppost1 = postsamples1(k);
+				 postsamples1(k) = postsamples1(k+1);
+				 postsamples1(k+1) = temppost1;
+			 }
+		 }
+		 if (swapped == false) 
+			break;
+        }
+			
+	l0[0] = 100000;
+	u0[0] = -100000;
+	l1[0] = 100000;
+	u1[0] = -100000;
+	YIl[0] = 100000;
+	YIu[0] = -100000;
+	for(int i = (0.05*M-1); i<M; i++){
+		if(l0[0]>postsamples0(i)){
+			l0[0]=postsamples0(i);
+		}
+		if(u0[0]<postsamples0(i)){
+			u0[0]=postsamples0(i);
+		}
+		if(l1[0]>postsamples1(i)){
+			l1[0]=postsamples1(i);
+		}
+		if(u1[0]<postsamples1(i)){
+			u1[0]=postsamples1(i);
+		}
+		if(YIl[0]>YI(i)){
+			YIl[0]=YI(i);
+		}
+		if(YIu[0]<YI(i)){
+			YIu[0]=YI(i);
+		}
+	}*/
+	
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
+	l0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.975-1);
+	l1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.975-1);
+	if ( (l0[0] < bootmean0[0]) && (u0[0] > bootmean0[0]) ){
+		cov_ind.push_back(1.0);
+	} else {cov_ind.push_back(0.0);}
+	if ( (l1[0] < bootmean1[0]) && (u1[0] > bootmean1[0]) ){
+		cov_ind.push_back(1.0);
+	} else {cov_ind.push_back(0.0);}
+	
+	return cov_ind;	
+}
+
+
+// Proposal Schedule as input
+// [[Rcpp::export]]
+Rcpp::List GibbsMCMC3smooth(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericVector bootmean0, NumericVector bootmean1, NumericVector priorsched, NumericVector scheduleLen, NumericMatrix propSched, NumericVector alpha, NumericVector ddelta, NumericVector M_samp, NumericVector w) {
+	
+	List result;
+	double pi = 3.14159265358979323846;
+	int M = int(M_samp[0]);
+	int n1 = int(nn[0]);
+	int n2 = int(nn[1]);
+	int n1p = int(nn[2]);
+	int n2p = int(nn[3]);
+	int sN = int(scheduleLen[0]);
+	double delta0 = double(ddelta[0]);
+	double delta1 = double(ddelta[1]);
+	double w0 = double(w[0]);
+	double w1 = double(w[1]);
+
+   	NumericVector prop0(1,0.0);
+   	NumericVector prop1(1,0.0);
+	double z1 = 0.0; double z2 = 0.0;
+   	NumericVector theta0old(1,0.0);
+	NumericVector theta0new(1,0.0);
+	NumericVector theta1old(1,0.0);
+	NumericVector theta1new(1,0.0);
+	NumericVector theta0temp(1,0.0);
+	NumericVector theta1temp(1,0.0);
+	NumericVector loglikdiff(1,0.0);
+	NumericVector loglikdiff1(1,0.0);
+	NumericVector loss1temp(1,0.0);
+	NumericVector loss2temp(1,0.0);	
+	NumericVector loss1old(1,0.0);
+	NumericVector loss1new(1,0.0);
+	NumericVector loss2old(1,0.0);
+	NumericVector loss2new(1,0.0);
+	NumericVector r(1,0.0);
+	NumericVector uu(1,0.0);
+	NumericVector postsamples0(M,0.0);
+	NumericVector postsamples1(M,0.0);
+	NumericVector logpost(M,0.0);
+	NumericVector l0(1,0.0);
+	NumericVector l1(1,0.0);
+	NumericVector u0(1,0.0);
+	NumericVector u1(1,0.0);
+	theta0old(0) = bootmean0(0);
+	theta1old(0) = bootmean1(0);
+	NumericVector acc(1, 0.0);
+	NumericVector d1y1(1,0.0);
+	NumericVector d1y2(1,0.0);
+	NumericVector d2y1(1,0.0);
+	NumericVector d2y2(1,0.0);
+
+
+
+	
+	for(int j=0; j<sN; j++){
+		if(w0<=propSched(j,0)){
+			prop0(0) = propSched(j,1);	
+		}
+		if(w1<=propSched(j,2)){
+			prop1(0) = propSched(j,3);	
+		}		
+	}
+	if(w0>1.0){
+		prop0(0) = propSched(0,1);	
+	}
+	if(w1>1.0){
+		prop1(0) = propSched(0,3);	
+	}
+	
+	for(int k=0; k<n1; k++){
+		if(data1(k,0)==-1){
+			d1y1(0) = d1y1(0) + 1.0;
+		}else {
+			d1y2(0) = d1y2(0) + 1.0;	
+		}
+	}
+	for(int k=0; k<n2; k++){
+		if(data2(k,0)==-1){
+			d2y1(0) = d2y1(0) + 1.0;
+		}else {
+			d2y2(0) = d2y2(0) + 1.0;	
+		}
+	}
+
+	
+	for(int k=0; k<n1; k++){
+		z1 = data1(k,0)*(data1(k,1)-theta0old(0));
+		loss1temp(0)=0;
+		if((z1>-delta0/2) && (z1<=delta0/2)){
+			loss1temp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+		}else if(z1<0){
+			loss1temp(0) = 1.0;	
+		}
+		if(data1(k,0)==-1){
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y1(0);
+		}else {
+			loss1old(0) = loss1old(0) + loss1temp(0)/d1y2(0);
+		}
+	}
+	for(int k=0; k<n2; k++){
+		z2 = data2(k,0)*(data2(k,1)-theta1old(0));
+		loss2temp(0)=0;
+		if((z2>-delta1/2) && (z2<=delta1/2)){
+			loss2temp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+		}else if(z2<0){
+			loss2temp(0) = 1.0;	
+		}
+		if(data2(k,0)==-1){
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y1(0);
+		}else {
+			loss2old(0) = loss2old(0) + loss2temp(0)/d2y2(0);
+		}
+	}
+
+
+
+	for(int j=0; j<M; j++) {
+		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
+		theta1temp(0) = R::rnorm(theta1old(0), prop1(0));
+		theta0new(0) = min(theta0temp(0), theta1temp(0));
+		theta1new(0) = max(theta0temp(0), theta1temp(0));
+
+		
+		loss1new(0) = 0.0;
+		loss2new(0) = 0.0;
+
+		for(int k=0; k<n1; k++){
+			z1 = data1(k,0)*(data1(k,1)-theta0new(0));
+			loss1temp(0)=0;
+			if((z1>-delta0/2) && (z1<=delta0/2)){
+				loss1temp(0) = 0.5 + 0.5*sin((pi/delta0)*(z1)+pi);
+			}else if(z1<0){
+				loss1temp(0) = 1.0;	
+			}
+			if(data1(k,0)==-1){
+				loss1new(0) = loss1new(0) + loss1temp(0)/d1y1(0);
+			}else {
+				loss1new(0) = loss1new(0) + loss1temp(0)/d1y2(0);
+			}
+		}
+		for(int k=0; k<n2; k++){
+			z2 = data2(k,0)*(data2(k,1)-theta1new(0));
+			loss2temp(0)=0;
+			if((z2>-delta1/2) && (z2<=delta1/2)){
+				loss2temp(0) = 0.5 + 0.5*sin((pi/delta1)*(z2)+pi);
+			}else if(z2<0){
+				loss2temp(0) = 1.0;	
+			}
+			if(data2(k,0)==-1){
+				loss2new(0) = loss2new(0) + loss2temp(0)/d2y1(0);
+			}else {
+				loss2new(0) = loss2new(0) + loss2temp(0)/d2y2(0);
+			}
+		}
+
+		loglikdiff(0) = 0.0;
+		loglikdiff1(0) = 0.0;
+		loglikdiff(0) = -n2*w1*(loss2new(0)-loss2old(0))-n1*w0*(loss1new(0)-loss1old(0));
+		loglikdiff1(0) = fmin(std::exp(loglikdiff(0))*((R::dnorm(theta0new(0),normprior[0],normprior[1],0)*R::dnorm(theta1new(0),normprior[2],normprior[3],0)+R::dnorm(theta1new(0),normprior[0],normprior[1],0)*R::dnorm(theta0new(0),normprior[2],normprior[3],0))/(R::dnorm(theta0old(0),normprior[0],normprior[1],0)*R::dnorm(theta1old(0),normprior[2],normprior[3],0)+R::dnorm(theta1old(0),normprior[0],normprior[1],0)*R::dnorm(theta0old(0),normprior[2],normprior[3],0))), 1.0);
+		uu[0] = R::runif(0.0,1.0);
+		if(uu(0) <= loglikdiff1(0)) {
+			postsamples0(j) = theta0new(0);
+			postsamples1(j) = theta1new(0);
+			logpost(j) = log(loglikdiff(0));
+			theta0old(0) = theta0new(0);
+			theta1old(0) = theta1new(0);
+			loss2old(0) = loss2new(0);
+			loss1old(0) = loss1new(0);
+
+			acc(0) = acc(0)+1;
+		}
+		else {
+			postsamples0(j) = theta0old(0);
+			postsamples1(j) = theta1old(0);
+			if(j>0){
+				logpost(j) = logpost(j-1);
+			}else {
+				logpost(j) = logpost(0);	
+			}
+		}
+	}	
+
+	std::sort(postsamples0.begin(), postsamples0.end());
+	std::sort(postsamples1.begin(), postsamples1.end());
+	l0[0] = postsamples0(M*.025-1);
+	u0[0] = postsamples0(M*.975-1);
+	l1[0] = postsamples1(M*.025-1);
+	u1[0] = postsamples1(M*.975-1);
+
+	acc(0) = acc(0)/M;
+	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
+
+	
+	return result;
+}
+
+
 
 // Proposal Schedule as input
 // [[Rcpp::export]]
@@ -2926,7 +3366,65 @@ NumericVector rcpp_parallel_smoothp_yi(NumericVector nn, NumericMatrix data1, Nu
 }
 	
 				      
-				      
+// with prior data
+				   
+struct GPCYI_yi_mcmc3_smooth_parallel : public Worker {
+	
+	const RVector<double> nn;
+	const RMatrix<double> data1;
+	const RMatrix<double> data2;
+	const RMatrix<double> thetaboot;
+	const RVector<double> bootmean0;
+	const RVector<double> bootmean1;
+	const RMatrix<double> databoot1;
+	const RMatrix<double> databoot2;
+	const RVector<double> priorsched;
+	const RVector<double> scheduleLen;
+	const RMatrix<double> propSched;
+	const RVector<double> ddelta;
+	const RVector<double> alpha;
+	const RVector<double> M_samp;
+	const RVector<double> B_resamp;
+	const RVector<double> w;
+	RMatrix<double> cover;
+	std::vector<double> temp;
+
+   // initialize with source and destination
+   GPCYI_yi_mcmc3_smooth_parallel(const NumericVector nn, const NumericMatrix data1, const NumericMatrix data2, const NumericMatrix thetaboot,
+	const NumericVector bootmean0, const NumericVector bootmean1, const NumericMatrix databoot1, const NumericMatrix databoot2, const NumericVector priorsched, const NumericVector scheduleLen, const NumericMatrix propSched,
+	const NumericVector ddelta, const NumericVector alpha, const NumericVector M_samp, const NumericVector B_resamp, const NumericVector w, NumericMatrix cover, std::vector<double> temp) 
+			: nn(nn), data1(data1), data2(data2), thetaboot(thetaboot), bootmean0(bootmean0), bootmean1(bootmean1), databoot1(databoot1), databoot2(databoot2), priorsched(priorsched), scheduleLen(scheduleLen), propSched(propSched), ddelta(ddelta), alpha(alpha), M_samp(M_samp), B_resamp(B_resamp), w(w), cover(cover), temp(temp) {}   
+
+   // operator
+void operator()(std::size_t begin, std::size_t end) {
+		for (std::size_t i = begin; i < end; i++) {
+			temp = GibbsMCMC3smooth(nn, data1, data2, thetaboot, bootmean0, bootmean1, databoot1, databoot2, priorsched, scheduleLen, propSched, ddelta, alpha, M_samp, w, i);	
+			cover(i,0) = temp[0];cover(i,1) = temp[1];
+		}
+	}
+};
+
+
+// [[Rcpp::export]]
+NumericVector rcpp_parallel_smooth3_yi(NumericVector nn, NumericMatrix data1, NumericMatrix data2, NumericMatrix thetaboot, NumericVector bootmean0,
+	NumericVector bootmean1, NumericMatrix databoot1, NumericMatrix databoot2, NumericVector priorsched, NumericVector scheduleLen, NumericMatrix propSched, NumericVector ddelta, NumericVector alpha, NumericVector M_samp, NumericVector B_resamp, 
+	NumericVector w) {
+		
+   int B = int(B_resamp[0]);
+   // allocate the matrix we will return
+   NumericMatrix cover(B,2); 
+   std::vector<double> temp;
+   // create the worker
+   GPCYI_yi_mcmc3_smooth_parallel gpcWorker(nn, data1, data2, thetaboot, bootmean0,
+	bootmean1, databoot1, databoot2, priorsched, scheduleLen, propSched, ddelta, alpha, M_samp, B_resamp, 
+	w, cover, temp);
+     
+   // call it with parallelFor
+   
+   parallelFor(0, B, gpcWorker);
+
+   return cover;
+}				      
 				      
 				      
 				      

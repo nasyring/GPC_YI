@@ -999,6 +999,7 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 		}
 		loss2old(0) = loss2old(0) + loss2temp(0);
 	}
+	/*
 
 	for(int j=0; j<M; j++) {
 		theta0temp(0) = R::rnorm(theta0old(0), prop0(0));
@@ -1064,6 +1065,8 @@ Rcpp::List GibbsMCMC2smooth(NumericVector nn, NumericMatrix data1, NumericMatrix
 
 	acc(0) = acc(0)/M;
 	result = Rcpp::List::create(Rcpp::Named("l0") = l0,Rcpp::Named("u0") = u0,Rcpp::Named("l1") = l1,Rcpp::Named("u1") = u1, Rcpp::Named("acceptance_rate") = acc, Rcpp::Named("samples0") = postsamples0, Rcpp::Named("samples1") = postsamples1, Rcpp::Named("logpost") = logpost);
+*/
+result = Rcpp::List::create(Rcpp::Named("loss1old") = loss1old, Rcpp::Named("loss2old") = loss2old);
 
 	return result;
 }

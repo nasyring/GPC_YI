@@ -1,0 +1,604 @@
+######
+#  Trail-Making Test Section 4.2
+#  Nicholas Syring
+######
+
+set.seed(12345)
+
+### Data
+
+U<-c(34, 58, 18, 29, 30, 37, 41, 36, 15, 36, 40, 36, 32, 26, 28, 25, 40,34, 
+27, 27, 35, 17, 56, 31, 29, 34, 46, 29, 44, 38, 31, 29, 50, 50, 41, 28, 34,
+44, 43, 34, 67, 76,33, 28,51, 45, 61, 36, 47, 30, 35, 39, 42, 40, 42, 41,17,
+25, 48, 61, 48, 34, 31, 35,48, 30, 33, 34, 34, 58, 28, 28, 24,55, 21, 21, 37,
+25, 38, 40, 55, 35, 39, 34,28, 37,37, 46, 37, 51, 37, 30, 46, 37, 24, 38, 23,
+52, 40, 34, 29,44, 30, 24, 35, 21, 48, 47,16, 34, 30, 28,35, 36, 34, 27, 31,
+37, 26, 50, 44, 42, 32, 42, 48, 43, 49, 23, 49, 16,26, 52, 34, 55, 51, 46, 63,
+42, 41, 53,38, 21, 68, 56, 46, 31, 33, 52, 33, 30, 50, 71, 29, 48, 63, 39, 31,
+32, 32, 43, 26, 35, 40, 39, 31, 31, 30, 24, 47, 30)
+
+MCI<-c(66, 34, 44, 56, 75, 45, 48, 43, 62, 68, 85, 107, 34, 82, 68, 103, 51, 57,
+50, 30, 38, 59, 31, 68, 65, 62, 51, 74, 46, 70, 40, 54, 51, 56, 40, 72, 123, 62,
+64, 76, 77, 75, 55, 94, 44, 51, 62, 33, 58, 53, 39, 55)
+
+D<-c(182, 63, 166, 143, 94 ,155, 78, 91, 239, 261, 101, 129, 73, 214, 82, 72,
+107, 129, 128, 52, 94, 71, 101)
+
+### Install the package GPCYI to calibrate Gibbs posterior 
+### credible intervals by choosing posterior scaling omega_n 
+#library(devtools)
+#install_github("nasyring/GPC_YI", subdir = "GPC_YI")
+library(GPCYI)
+RcppParallel::setThreadOptions(numThreads = 1)
+
+# packages for de Carvalho and Branscum (2018) nonparametric Bayesian approach
+require(pscl); require(Hmisc)
+
+### functions for de Carvalho and Branscum (2018) methods 
+dpm=function(y,grid,amu,b2mu,asigma2,bsigma2,nsim,alpha,L,scale=FALSE){
+	n=length(y); ngrid=length(grid); yt=y
+	if(scale==TRUE){yt=y/sd(y)}
+	p=ns=rep(0,L)
+	v=rep(1/L,L); v[L]=1
+	prop=prob=matrix(0,nrow=n,ncol=L)
+	P=Mu=Mu1=Sigma2=Sigma21=matrix(0,nrow=nsim,ncol=L)
+	Mu[1,]=rep(mean(yt),L); Sigma2[1,]=rep(var(yt),L)
+	Dens=array(0,c(nsim,ngrid,L)); Densm=matrix(0,nrow=nsim,ncol=ngrid)
+	Fdist=array(0,c(nsim,ngrid,L)); Fdistm=matrix(0,nrow=nsim,ncol=ngrid)
+	for(i in 2:nsim){
+		#allocate each observation to a mixture component
+		cumv=cumprod(1-v)
+		p[1]=v[1]; for(k in 2:L){p[k]=v[k]*cumv[k-1]}
+		for(k in 1:L){prop[,k]=p[k]*dnorm(yt,mean=Mu[i-1,k],
+		sd=sqrt(Sigma2[i-1,k]))}
+		prob=prop/apply(prop,1,sum)
+		z=rMultinom(prob,1)
+		P[i,]=p	
+		for(k in 1:L){ns[k]=length(which(z==k))}		
+		#update the stick-breaking weights inputs
+		for(k in 1:(L-1)){v[k]=rbeta(1,1+ns[k],alpha+sum(ns[(k+1):L]))}		
+		#update parameters of each component and density/distribution 
+		#function 
+		#trajectories
+		for(k in 1:L){
+			varmu=1/((1/b2mu)+(ns[k]/Sigma2[i-1,k]))
+			meanmu=((sum(yt[z==k])/Sigma2[i-1,k])+(amu/b2mu))/
+				((1/b2mu)+(ns[k]/Sigma2[i-1,k]))
+			Mu1[i,k]=Mu[i,k]=rnorm(1,mean=meanmu,sd=sqrt(varmu))
+			if(scale==TRUE){Mu1[i,k]=sd(y)*Mu[i,k]}
+			Sigma21[i,k]=Sigma2[i,k]=rigamma(1,asigma2+ns[k]/2,
+				bsigma2+0.5*sum((yt[z==k]-Mu[i,k])^2))
+			if(scale==TRUE){Sigma21[i,k]=var(y)*Sigma2[i,k]}
+			Dens[i,,k]=P[i,k]*dnorm(grid,Mu1[i,k],sqrt(Sigma21[i,k]))
+			Fdist[i,,k]=P[i,k]*pnorm(grid,Mu1[i,k],sqrt(Sigma21[i,k]))
+		}
+		for(j in 1:ngrid){
+			Densm[i,j]=sum(Dens[i,j,])
+			Fdistm[i,j]=sum(Fdist[i,j,])
+		}
+	}
+	return(list(P,Mu1,Sigma21,Densm,Fdistm))
+}
+
+### loss functions for classification
+sgn <- function(x){
+	return(ifelse(x>0,1,-1))
+}
+zero.one.loss <- function(data,theta){
+	return(0.5*(1-data[1]*sgn(data[2]-theta)))
+}
+emp.risk.zero.one1 <- function(theta, data) sum(apply(data,1,zero.one.loss,
+			theta=theta))
+emp.risk.zero.one <- function(theta, data1, data2) sum(apply(data1,1,
+			zero.one.loss,theta=theta[1]))+sum(apply(data2,1,
+			zero.one.loss,theta=theta[2]))
+minimize.zero.one <- function(theta, data1, data2) apply(matrix(theta,
+			length(theta)/2,2), 1, emp.risk.zero.one, data1=data1, 
+			data2=data2)
+psi.delta <- function(data, theta, delta){
+	y = data[1]
+	x = data[2]
+	z = y*(x-theta)
+	val <- 0
+	if(z>-delta/2 & z<=delta/2){
+		val <- 0.5+0.5*sin((pi/delta)*z+pi)
+	}else if(z<0){
+		val <- 1
+	}
+	return(val)
+}
+app.psi.unbalanced1 <- function(theta, data,delta){
+ 	n<-nrow(data)
+	n1 <- sum(data[,1]==-1)
+	n2 <- n - n1
+	d1 <- data[data[,1]==-1,] 
+	d2 <- data[data[,1]==1,] 
+	return(sum(apply(d2,1,psi.delta,theta=theta,delta=delta))/n2 
+		+ sum(apply(d1,1,psi.delta,theta=theta,delta=delta))/n1)
+}
+app.psi.unbalanced <- function(theta, data,delta){
+	return( app.psi.unbalanced1(theta[1],data$data1, delta[1]) 
+		+ app.psi.unbalanced1(theta[2],data$data2, delta[2]))
+}
+minimize.psi.unbalanced <- function(theta, data, delta) apply(matrix(theta,
+				length(theta)/2,2),1, app.psi.unbalanced, 
+				data = data, delta=delta)
+minimize.psi1 <- function(theta, data, delta) apply(matrix(theta,
+				length(theta),1), 1, app.psi1, data=data, 
+				delta=delta)
+app.psi <- function(theta, data1,data2,delta)  sum(apply(data1,1,psi.delta,
+		theta=theta[1],delta=delta[1]))+sum(apply(data2,1,psi.delta,
+		theta=theta[2],delta=delta[2]))
+minimize.psi <- function(theta, data1, data2,  delta) apply(matrix(theta,
+				length(theta)/2,2),1, app.psi, data1=data1, 
+				data2=data2, delta=delta)
+
+### Split the data and use half to simulate prior information
+subset_U <- sample.int(length(U), round(length(U)/2),replace = FALSE)
+subset_MCI <- sample.int(length(MCI), round(length(MCI)/2),replace = FALSE)
+subset_D <- sample.int(length(D), round(length(D)/2),replace = FALSE)
+U1 <- U[subset_U]
+U2 <- U[-subset_U]
+MCI1 <- MCI[subset_MCI]
+MCI2 <- MCI[-subset_MCI]
+D1 <- D[subset_D]
+D2 <- D[-subset_D]
+
+### de Carvalho and Branscum (2018) method
+nsim<-5000 
+nburn<-1500
+grid<-seq(min(U1),max(D1),len=200); ngrid<-length(grid)
+res1=dpm(y=U1,grid=grid,amu=0,b2mu=100,asigma2=2,bsigma2=0.5,nsim=nsim,
+	alpha=1,L=20,scale=TRUE)
+res2=dpm(y=MCI1,grid=grid,amu=0,b2mu=100,asigma2=2,bsigma2=0.5,nsim=nsim,
+	alpha=1,L=20,scale=TRUE)
+res3=dpm(y=D1,grid=grid,amu=0,b2mu=100,asigma2=2,bsigma2=0.5,nsim=nsim,
+	alpha=1,L=20,scale=TRUE)
+
+#grid search to find the pair of optimal cutoffs
+post.ests <- matrix(NA, nsim - nburn, 2)
+for(k in 1:(nsim - nburn)){
+	ests <- matrix(NA, 200*200, 3)
+	ind<-1
+	for(i in 1:200){
+		for(j in 1:200){
+			if(i<=j){
+diffs <- res1[[5]][(nburn+k),i]+res2[[5]][(nburn+k),j]-res2[[5]][(nburn+k),i]-res3[[5]][(nburn+k),j]
+			} else {
+				diffs <- NA
+			}
+			ests[ind, ] <- c(grid[i], grid[j], diffs)
+			ind <- ind+1
+	}}
+	w.m <- which.max(ests[,3])
+	post.ests[k,] <- ests[w.m,1:2]
+}
+
+c1optint=quantile(post.ests[,1],c(0.025,0.975))
+c2optint=quantile(post.ests[,2],c(0.025,0.975))
+c1optint
+c2optint
+#> c1optint
+#    2.5%    97.5% 
+#41.52261 52.55779 
+#> c2optint
+#    2.5%    97.5% 
+#67.27136 99.15075 
+
+### Gibbs posterior sampling using one half of split data U2, MCI2, D2 as prior
+fulldata1 <- rbind(cbind(rep(-1,length(U)),U), cbind(rep(1,length(MCI)),MCI))
+fulldata2 <- rbind(cbind(rep(-1,length(MCI)),MCI), cbind(rep(1,length(D)),D))
+data1 <- rbind(cbind(rep(-1,length(U1)),U1), cbind(rep(1,length(MCI1)),MCI1))
+data2 <- rbind(cbind(rep(-1,length(MCI1)),MCI1), cbind(rep(1,length(D1)),D1))
+priordata1 <- rbind(cbind(rep(-1,length(U2)),U2), cbind(rep(1,length(MCI2)),MCI2))
+priordata2 <- rbind(cbind(rep(-1,length(MCI2)),MCI2), cbind(rep(1,length(D2)),D2))
+sample.data <- list(data1=data1, data2=data2)
+full.data <- list(data1=fulldata1, data2=fulldata2)
+delta <- c(2,2)
+# bootstrap the M-estimator
+B <- 1000
+theta.hat <- optim(c(50,70), minimize.psi.unbalanced, data=sample.data, 
+		delta = delta)$par
+boot.data1 <- matrix(0,nrow(sample.data$data1), 2*B)
+boot.data2 <- matrix(0,nrow(sample.data$data2), 2*B)
+theta.hat.rep <- matrix(0,B,2)
+# bootstrapping
+for(b in 1:B){
+	sample1 <- sample.int(length(U1),length(U1),replace=TRUE)	
+	sample2 <- sample.int(length(MCI1),length(MCI1),replace=TRUE)
+	sample3 <- sample.int(length(D1),length(D1),replace=TRUE)
+	boot.data1[,(2*b-1):(2*b)] <- rbind(cbind(rep(-1,length(sample1)),
+		U1[sample1]),cbind(rep(1,length(sample2)),MCI1[sample2]))
+	boot.data2[,(2*b-1):(2*b)] <- rbind(cbind(rep(-1,length(sample2)),
+		MCI1[sample2]),cbind(rep(1,length(sample3)),D1[sample3]))
+	theta.hat.rep[b, ] <- optim(c(50,70), minimize.psi.unbalanced,
+		data=list(data1=boot.data1[,(2*b-1):(2*b)],
+		data2 = boot.data2[,(2*b-1):(2*b)]), delta = delta)$par
+}
+boot.int.theta1 <- c(quantile(theta.hat.rep[,1], .025), 
+			quantile(theta.hat.rep[,1], .975))
+boot.int.theta2 <- c(quantile(theta.hat.rep[,2], .025), 
+			quantile(theta.hat.rep[,2], .975))	
+boot.int.theta1
+boot.int.theta2
+#> boot.int.theta1
+#    2.5%    97.5% 
+#39.00003 53.28374 
+#> boot.int.theta2
+#     2.5%     97.5% 
+#62.27550 88.77908 
+theta.hat.prior <- optim(c(50,70), minimize.psi.unbalanced, 
+			data=list(data1=priordata1,
+			data2=priordata2), delta = delta)$par
+boot.data1p <- matrix(0,nrow(priordata1), 2*B)
+boot.data2p <- matrix(0,nrow(priordata2), 2*B)
+theta.hat.repp <- matrix(0,B,2)
+# bootstrapping
+for(b in 1:B){
+	sample1p <- sample.int(length(U2),length(U2),replace=TRUE)	
+	sample2p <- sample.int(length(MCI2),length(MCI2),replace=TRUE)
+	sample3p <- sample.int(length(D2),length(D2),replace=TRUE)
+	boot.data1p[,(2*b-1):(2*b)] <- rbind(cbind(rep(-1,length(sample1p)),
+					U2[sample1p]),cbind(rep(1,
+					length(sample2p)),MCI2[sample2p]))
+	boot.data2p[,(2*b-1):(2*b)] <- rbind(cbind(rep(-1,length(sample2p)),
+					MCI2[sample2p]),cbind(rep(1,
+					length(sample3p)),D2[sample3p]))
+	theta.hat.repp[b, ] <- optim(c(50,70), minimize.psi.unbalanced, 
+				data=list(data1=boot.data1p[,(2*b-1):(2*b)], 
+				data2 = boot.data2p[,(2*b-1):(2*b)]), 
+				delta = delta)$par
+}
+m1p<-mean(theta.hat.repp[,1])
+m2p<-mean(theta.hat.repp[,2])
+boot.int.theta1.p <- c(quantile(theta.hat.repp[,1], .025), 
+			quantile(theta.hat.repp[,1], .975))
+boot.int.theta2.p <- c(quantile(theta.hat.repp[,2], .025), 
+			quantile(theta.hat.repp[,2], .975))	
+s1p<-(boot.int.theta1.p[2]-boot.int.theta1.p[1])/4
+s2p<-(boot.int.theta2.p[2]-boot.int.theta2.p[1])/4		
+#> m1p
+#[1] 50.85782
+#> m2p
+#[1] 73.13058
+#>  s1p
+#97.5% 
+#  3.5 
+#> s2p
+#   97.5% 
+#4.298953 
+M<-2000
+w.seq <- seq(from = 5, to = .5, by = -.5)
+w<-c(.3,.2)
+go1 <- TRUE
+go2 <- TRUE
+t <- 0
+k <- function(t) (1 + t)**(-0.51)
+while(go1 || go2) {
+	t<-t+1
+       	cover = rcpp_parallel_smooth3_yi(c(111,38), sample.data$data1, 
+		sample.data$data2, theta.hat.rep, theta.hat[1], theta.hat[2], 
+		boot.data1, boot.data2,c(m1p,s1p,m2p,s2p), 10,
+		cbind(w.seq,c(1,3,3,3,4,4,6,8,8,8),w.seq,c(1,3,3,3,4,4,6,8,8,8)),
+		delta,.05,M,B,w)
+        diff <- colMeans(cover) - c(.95,.95)
+	if(abs(diff[1])<=.01 || t>20) go1 <- FALSE else {
+       		w[1] <- max(w[1] + 1*k(t) * diff[1],.1)
+        }
+	if(abs(diff[2])<=.01 || t>20) go2 <- FALSE else {
+        	w[2] <- max(w[2] + 1*k(t) * diff[2],.1)
+      	}
+}
+#> colMeans(cover)
+#[1]  0.951 0.952
+#   w
+# 0.3206218 0.3319457
+Gibbs.post<-GibbsMCMC3smooth(c(111,38), sample.data$data1, sample.data$data2,
+		mean(theta.hat.rep[,1]), mean(theta.hat.rep[,2]),
+		c(m1p,s1p,m2p,s2p),10, cbind(w.seq,c(1,3,3,3,4,4,6,8,8,8),
+		w.seq,c(1,3,3,3,4,4,6,8,8,8)),.05,delta, M*10,w)
+Gibbs.post$acceptance_rate
+Gibbs.95.ci.inf <- c(Gibbs.post$l0,Gibbs.post$u0,Gibbs.post$l1,Gibbs.post$u1)
+Gibbs.95.ci.inf
+#> Gibbs.95.ci.inf
+#47.14645 57.83686 65.24910 82.15297
+
+
+# Non-informative
+m1p<-mean(theta.hat.repp[,1])
+m2p<-mean(theta.hat.repp[,2])
+s1p<-15
+s2p<-15		
+M<-2000
+w.seq <- seq(from = 5, to = .5, by = -.5)
+w<-c(.3,.2)
+go1 <- TRUE
+go2 <- TRUE
+t <- 0
+k <- function(t) (1 + t)**(-0.51)
+while(go1 || go2) {
+	t<-t+1
+       	cover = rcpp_parallel_smooth3_yi(c(111,38), sample.data$data1, 
+		sample.data$data2, theta.hat.rep, theta.hat[1], theta.hat[2], 
+		boot.data1, boot.data2,c(m1p,s1p,m2p,s2p), 10,
+		cbind(w.seq,3*c(1,3,3,3,4,4,6,8,8,8),w.seq,3*c(1,3,3,3,4,4,6,8,8,8)),
+		delta,.05,M,B,w)
+        diff <- colMeans(cover) - c(.95,.95)
+	if(abs(diff[1])<=.01 || t>20) go1 <- FALSE else {
+       		w[1] <- max(w[1] + 1*k(t) * diff[1],.1)
+        }
+	if(abs(diff[2])<=.01 || t>20) go2 <- FALSE else {
+        	w[2] <- max(w[2] + 1*k(t) * diff[2],.1)
+      	}
+}
+#> colMeans(cover)
+#[1] 0.947 0.959
+#   w
+# 0.1658961 0.3777593
+Gibbs.post.f<-GibbsMCMC3smooth(c(111,38), sample.data$data1, sample.data$data2,
+		mean(theta.hat.rep[,1]), mean(theta.hat.rep[,2]),
+		c(m1p,s1p,m2p,s2p),10, cbind(w.seq,3*c(1,3,3,3,4,4,6,8,8,8),
+		w.seq,3*c(1,3,3,3,4,4,6,8,8,8)),.05,delta, M*10,w)
+Gibbs.post.f$acceptance_rate
+Gibbs.95.ci.inf.f <- c(Gibbs.post.f$l0,Gibbs.post.f$u0,Gibbs.post.f$l1,Gibbs.post.f$u1)
+Gibbs.95.ci.inf.f
+#> Gibbs.95.ci.inf.f
+#43.06875  77.37370  60.40165 104.03850
+
+
+### half data plots
+dU <- density(U) 
+dMCI <- density(MCI) 
+dD <- density(D) 
+hist(U, col = 'grey', xlim = c(0,300), breaks = 10, freq = FALSE, 
+main = '', xlab = 'TMT completion time')
+hist(D, col = 'lightgrey', add = TRUE, breaks = 10, freq = FALSE)
+hist(MCI, col = 'darkgrey', add = TRUE, breaks = 10, freq = FALSE)
+lines(dU, xlim = c(0,200), lwd = 2, main = '',
+	xlab = 'Completion Time', ylab = 'Kernel Density Estimate') 
+lines(dMCI, lwd = 2)
+lines(dD, lwd = 2)
+
+# transparency overlapping
+hist(U, col = rgb(1,0,0,0.5), xlim = c(0,300), breaks = 10, freq = FALSE, 
+main = '', xlab = 'TMT completion time')
+hist(D, col = rgb(0,1,0,0.5), add = TRUE, breaks = 10, freq = FALSE)
+hist(MCI, col = rgb(0,0,1,0.5), add = TRUE, breaks = 10, freq = FALSE)
+lines(dU, xlim = c(0,200), lwd = 2, main = '',
+	xlab = 'Completion Time', ylab = 'Kernel Density Estimate') 
+lines(dMCI, lwd = 2)
+lines(dD, lwd = 2)
+
+lines(c(39,53.5),c(.015,.015),lwd = 2, lty = 3, type = 'o')
+lines(c(62.14,89.4),c(.005,.005),lwd = 2, lty = 3, type = 'o')
+lines(c(41.52, 52.56),c(.017,.017),lwd = 2, lty = 2, type = 'o')
+lines(c(67.27,99.15),c(.007,.007),lwd = 2, lty = 2, type = 'o')
+lines(c(47.14645, 57.83686),c(.019,.019),lwd = 2, lty = 1, type = 'o')
+lines(c(65.24910, 82.15297),c(.009,.009),lwd = 2, lty = 1, type = 'o')
+lines(c(43.08879,  76.54816 ),c(.021,.021),lwd = 2, lty = 4, type = 'o')
+lines(c(61.74685, 112.09084),c(.011,.011),lwd = 2, lty = 4, type = 'o')
+
+boxplot(post.ests[,1], at = 1, xlim = c(0,5), ylim = c(30,90), xlab = expression(theta[1]))
+boxplot(theta.hat.rep[,1], add=TRUE, at = 2)
+boxplot(Gibbs.post$samples0, add=TRUE, at = 3)
+boxplot(Gibbs.post.f$samples0, add=TRUE, at = 4)
+points(c(1,1,2,2,3,3,4,4),c(41.52,52.56, 39,53.3,47.15,57.84,43.07,77.37), pch =8)
+
+boxplot(post.ests[,2], at = 1, xlim = c(0,5), ylim = c(50,120), xlab = expression(theta[2]))
+boxplot(theta.hat.rep[,2], add=TRUE, at = 2)
+boxplot(Gibbs.post$samples1, add=TRUE, at = 3)
+boxplot(Gibbs.post.f$samples1, add=TRUE, at = 4)
+points(c(1,1,2,2,3,3,4,4),c(67.27136, 99.15075 ,62.27550, 88.77908 ,65.24910, 
+82.15297,60.40165, 104.03850), pch =8)
+
+
+library(plot3D)
+
+
+##  Create cuts:
+gibbs_c0 <- cut(Gibbs.post$samples0, 40)
+gibbs_c1 <- cut(Gibbs.post$samples1, 40)
+
+##  Calculate joint counts at cut levels:
+z <- table(gibbs_c0, gibbs_c1)
+
+##  Plot as a 3D histogram:
+hist3D(z=z, border="black")
+
+##  Plot as a 2D heatmap:
+image2D(z=z, border="black")
+
+
+install.packages('sparr')
+library(sparr)
+library(spatstat)
+
+# Fixed bandwidth kernel density; uniform edge correction
+chden1 <- bivariate.density(ppp(Gibbs.post$samples0,
+Gibbs.post$samples1,window = owin(xrange=c(40,68),yrange=c(58,91))),h0=1.5) 
+ 
+
+par(bty = 'n')
+plot(chden1, col = colourmap(grey(seq(1,0,length.out = 1000)), 
+range=c(0,0.02)), xaxt = '', yaxt = 'n', xlab = expression(theta[1]), ylab = expression(theta[2]))
+axis(2,c(58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,92))
+axis(1,c(40,42,44,46,48,50,52,54,56,58,60,62,64,66,68))
+
+x = c(1,2,3,4,5)
+y = c(1,2,3,4,5)
+z = rbind(
+  c(0, 1, 0, 1, 0),
+  c(1, 0, 1, 0, 1),
+  c(0, 1, 0, 1, 0),
+  c(1, 0, 1, 0, 1),
+  c(0, 1, 0, 1, 0))
+posterior.density <- chden1$z$v
+
+library(plotly)
+fig <- plot_ly(type = 'surface',colors = 'Greys',contours = list(
+    x = list(show = TRUE, start = 1.5, end = 2, size = 0.04, color = 'white'),
+    z = list(show = TRUE, start = 0.5, end = 0.8, size = 0.05)),
+  x = ~chden1$z$xcol,
+  y = ~chden1$z$ycol,
+  z = ~posterior.density)
+
+fig <- fig %>% layout(
+    scene = list(
+      xaxis = list(title = ''),
+      yaxis = list(title = ''),
+      zaxis = list(title = "density")
+    ))
+fig <- fig %>% config(mathjax = "cdn")
+
+fig
+
+
+
+
+
+### Full data 
+
+### de Carvalho and Branscum (2018) method
+nsim<-5000 
+nburn<-1500
+grid<-seq(min(U),max(D),len=200); ngrid<-length(grid)
+res1=dpm(y=U,grid=grid,amu=0,b2mu=100,asigma2=2,bsigma2=0.5,nsim=nsim,
+	alpha=1,L=20,scale=TRUE)
+res2=dpm(y=MCI,grid=grid,amu=0,b2mu=100,asigma2=2,bsigma2=0.5,nsim=nsim,
+	alpha=1,L=20,scale=TRUE)
+res3=dpm(y=D,grid=grid,amu=0,b2mu=100,asigma2=2,bsigma2=0.5,nsim=nsim,
+	alpha=1,L=20,scale=TRUE)
+
+#grid search to find the pair of optimal cutoffs
+post.ests <- matrix(NA, nsim - nburn, 2)
+for(k in 1:(nsim - nburn)){
+	ests <- matrix(NA, 200*200, 3)
+	ind<-1
+	for(i in 1:200){
+		for(j in 1:200){
+			if(i<=j){
+diffs <- res1[[5]][(nburn+k),i]+res2[[5]][(nburn+k),j]-res2[[5]][(nburn+k),i]-res3[[5]][(nburn+k),j]
+			} else {
+				diffs <- NA
+			}
+			ests[ind, ] <- c(grid[i], grid[j], diffs)
+			ind <- ind+1
+	}}
+	w.m <- which.max(ests[,3])
+	post.ests[k,] <- ests[w.m,1:2]
+}
+
+c1optint=quantile(post.ests[,1],c(0.025,0.975))
+c2optint=quantile(post.ests[,2],c(0.025,0.975))
+c1optint
+c2optint#> c1optint
+#    2.5%    97.5% 
+#43.43216 50.84925 
+#> c2optint
+#    2.5%    97.5% 
+#73.10050 90.40704 
+
+### Gibbs posterior sampling using one half of split data U2, MCI2, D2 as prior
+fulldata1 <- rbind(cbind(rep(-1,length(U)),U), cbind(rep(1,length(MCI)),MCI))
+fulldata2 <- rbind(cbind(rep(-1,length(MCI)),MCI), cbind(rep(1,length(D)),D))
+data1 <- rbind(cbind(rep(-1,length(U1)),U1), cbind(rep(1,length(MCI1)),MCI1))
+data2 <- rbind(cbind(rep(-1,length(MCI1)),MCI1), cbind(rep(1,length(D1)),D1))
+priordata1 <- rbind(cbind(rep(-1,length(U2)),U2), cbind(rep(1,length(MCI2)),MCI2))
+priordata2 <- rbind(cbind(rep(-1,length(MCI2)),MCI2), cbind(rep(1,length(D2)),D2))
+sample.data <- list(data1=data1, data2=data2)
+full.data <- list(data1=fulldata1, data2=fulldata2)
+delta <- c(2,2)
+# bootstrap the M-estimator
+B <- 1000
+theta.hat <- optim(c(50,70), minimize.psi.unbalanced, data=sample.data, 
+		delta = delta)$par
+boot.data1 <- matrix(0,nrow(fulldata1), 2*B)
+boot.data2 <- matrix(0,nrow(fulldata2), 2*B)
+theta.hat.rep <- matrix(0,B,2)
+# bootstrapping
+for(b in 1:B){
+	sample1 <- sample.int(length(U),length(U),replace=TRUE)	
+	sample2 <- sample.int(length(MCI),length(MCI),replace=TRUE)
+	sample3 <- sample.int(length(D),length(D),replace=TRUE)
+	boot.data1[,(2*b-1):(2*b)] <- rbind(cbind(rep(-1,length(sample1)),
+		U[sample1]),cbind(rep(1,length(sample2)),MCI[sample2]))
+	boot.data2[,(2*b-1):(2*b)] <- rbind(cbind(rep(-1,length(sample2)),
+		MCI[sample2]),cbind(rep(1,length(sample3)),D[sample3]))
+	theta.hat.rep[b, ] <- optim(c(50,70), minimize.psi.unbalanced,
+		data=list(data1=boot.data1[,(2*b-1):(2*b)],
+		data2 = boot.data2[,(2*b-1):(2*b)]), delta = delta)$par
+}
+boot.int.theta1 <- c(quantile(theta.hat.rep[,1], .025), 
+			quantile(theta.hat.rep[,1], .975))
+boot.int.theta2 <- c(quantile(theta.hat.rep[,2], .025), 
+			quantile(theta.hat.rep[,2], .975))	
+boot.int.theta1
+boot.int.theta2
+#> boot.int.theta1
+#    2.5%    97.5% 
+#42.39721 53.34915 
+#> boot.int.theta2
+#     2.5%     97.5% 
+#69.28192 85.66246 
+
+m1p<-mean(fulldata1[,2])
+m2p<-mean(fulldata2[,2])
+s1p<-10
+s2p<-10	
+#> m1p
+#[1] 48.48885
+#> m2p
+#[1] 73.78564
+#> s1p
+#[1] 20
+#> s2p
+#[1] 20
+M<-2000
+w.seq <- seq(from = 5, to = .5, by = -.5)
+w<-c(.3,.2)
+go1 <- TRUE
+go2 <- TRUE
+t <- 0
+k <- function(t) (1 + t)**(-0.51)
+while(go1 || go2) {
+	t<-t+1
+       	cover = rcpp_parallel_smooth3_yi(c(222,75), fulldata1, 
+		fulldata2, theta.hat.rep, theta.hat[1], theta.hat[2], 
+		boot.data1, boot.data2,c(m1p,s1p,m2p,s2p), 10,
+		cbind(w.seq,2*c(1,3,3,3,4,4,6,8,8,8),w.seq,2*c(1,3,3,3,4,4,6,8,8,8)),
+		delta,.05,M,B,w)
+        diff <- colMeans(cover) - c(.95,.95)
+	if(abs(diff[1])<=.01 || t>20) go1 <- FALSE else {
+       		w[1] <- max(w[1] + 1*k(t) * diff[1],.1)
+        }
+	if(abs(diff[2])<=.01 || t>20) go2 <- FALSE else {
+        	w[2] <- max(w[2] + 1*k(t) * diff[2],.1)
+      	}
+}
+#> colMeans(cover)
+#
+#   w
+#
+Gibbs.post<-GibbsMCMC3smooth(c(222,75), fulldata1, fulldata2,
+		mean(theta.hat.rep[,1]), mean(theta.hat.rep[,2]),
+		c(m1p,s1p,m2p,s2p),10, cbind(w.seq,2*c(1,3,3,3,4,4,6,8,8,8),
+		w.seq,2*c(1,3,3,3,4,4,6,8,8,8)),.05,delta, M*10,w)
+Gibbs.post$acceptance_rate
+Gibbs.95.ci.inf <- c(Gibbs.post$l0,Gibbs.post$u0,Gibbs.post$l1,Gibbs.post$u1)
+Gibbs.95.ci.inf
+#> Gibbs.95.ci.inf
+#
+
+
+boxplot(copt[,1], at = 1, xlim = c(0,4))
+boxplot(theta.hat.rep[,1], add=TRUE, at = 2)
+boxplot(Gibbs.post$samples0, add=TRUE, at = 3)
+
+boxplot(copt[,2], at = 1, xlim = c(0,4))
+boxplot(theta.hat.rep[,2], add=TRUE, at = 2)
+boxplot(Gibbs.post$samples1, add=TRUE, at = 3)
+
+
+
+
+

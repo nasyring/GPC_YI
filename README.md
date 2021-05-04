@@ -1,7 +1,7 @@
 # GPC algorithm
 
 
-GPC R Codes includes an R script to implement the youden index examples in ...
+GPC R Codes includes R scripts to implement examples of Gibbs posterior inference on the Youden index cutoff for dementia diagnosis and diabetes diagnosis.
 
 Additionally, the GPC_YI folder contains files needed to install an GPC_YI package with Rcpp codes for all  examples done in the above paper.
 

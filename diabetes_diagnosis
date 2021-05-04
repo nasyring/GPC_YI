@@ -1,0 +1,301 @@
+###
+# Diabetes and Age, Section 5.4
+# Nicholas Syring	
+###
+
+### Load packages
+library(splines)
+library(Hmisc)
+library(MASS)
+
+### functions for de Carvalho et al. (2017) nonparametric Bayesian regression
+
+bsplinesddp <- function(y, x, grid, xpred, m, S, nu, psi, atau, btau, alpha, 
+		L, nsim, knots) {
+	yt <- y / sd(y)
+	n <- length(y)
+	ngrid <- length(grid)
+	npred <- length(xpred)
+	X <- bs(x, degree = 3, knots = knots, intercept = TRUE)
+	k <- ncol(X)
+	Xpred <- predict(bs(x, degree = 3, knots = knots, intercept = TRUE),
+			xpred)
+	p <- ns <- rep(0, L)
+	v <- rep(1 / L, L)
+	v[L] <- 1
+	beta <- matrix(0, nrow = L, ncol = k)
+	tau <- rep(1 / var(yt), L)
+	prop <- prob <- matrix(0, nrow = n, ncol = L)
+	P <- Tau <- Sigma2 <- matrix(0, nrow = nsim, ncol = L)
+	Beta <- Beta1 <- array(0, c(nsim, L, k))
+	Beta[1, , ] <- beta
+	Tau[1, ] <- tau
+	mu <- matrix(0, nrow = nsim, ncol = k)
+	Sigmainv <- array(0, c(nsim, k, k))
+	mu[1, ] <- mvrnorm(1, mu = m, Sigma = S)
+	Sigmainv[1, , ] <- rWishart(1, df = nu, solve(nu * psi))
+	Dens <- array(0, c(nsim, ngrid, L, npred))
+	Densm <- array(0, c(nsim, ngrid, npred))
+	Fdist <- array(0, c(nsim, ngrid, L, npred))
+	Fdistm <- array(0, c(nsim, ngrid, npred))
+
+	# 1) ALLOCATE EACH OBSERVATION TO A COMPONENT MIXTURE
+	for(i in 2:nsim) {
+		cumv <- cumprod(1 - v)
+		p[1] <- v[1]
+		for(l in 2:L)
+			p[l] <- v[l] * cumv[l - 1]
+		for(l in 1:L)
+			prop[, l] <- p[l] * dnorm(yt, mean = X %*% beta[l, ],
+			sd = sqrt(1 / tau[l]))
+		prob <- prop / apply(prop, 1, sum)
+		z <- rMultinom(prob, 1)
+		P[i, ] <- p
+		for(l in 1:L)
+			ns[l] <- length(which(z == l))
+	# 2) UPDATE STICK-BREAKING WEIGHTS
+	for(l in 1:(L - 1))
+		v[l] <- rbeta(1, 1 + ns[l], alpha + sum(ns[(l + 1):L]))
+	# 3) UPDATE PARAMETERS OF EACH COMPONENT MIXTURE
+	for(l in 1:L) {
+		tX <- matrix(t(X[z == l, ]), nrow = k, ncol = ns[l])
+		V <- solve(Sigmainv[i - 1, ,] + tau[l] * tX %*% X[z == l, ])
+		mu1 <- V %*% (Sigmainv[i - 1, , ] %*% mu[i - 1, ] + tau[l] *
+		tX %*% yt[z == l])
+		Beta[i, l, ] <- beta[l,] <- mvrnorm(1, mu = mu1, Sigma = V)
+		Beta1[i, l, ] <- sd(y) * Beta[i, l, ]
+		Tau[i, l] <- tau[l] <- rgamma(1, shape = atau + (ns[l] / 2),
+		rate = btau + 0.5 * (t(yt[z == l] -
+		X[z == l, ] %*% beta[l, ]) %*%(yt[z == l] - X[z == l, ]%*% 
+			beta[l, ])))
+		Sigma2[i, l] <- var(y) * (1 / Tau[i, l])
+	}
+		Vaux <- solve(solve(S) + L * Sigmainv[i - 1, , ])
+		meanmu <- Vaux %*% (solve(S) %*% m + Sigmainv[i - 1, , ] %*%
+		t(t(apply(Beta[i, , ], 2, sum))))
+		mu[i, ] <- mvrnorm(1, mu = meanmu, Sigma = Vaux)
+		Vaux1 <- 0
+		for(l in 1:L)
+			Vaux1 <- Vaux1 + (Beta[i, l, ] - mu[i, ]) %*%
+				t((Beta[i, l, ] - mu[i, ]))
+		Sigmainv[i, , ] <- rWishart(1, nu + L, solve(nu * psi + Vaux1))
+	# 4) COMPUTE DENSITY AND DISTRIBUTION FUNCTION TRAJECTORIES
+	for(l in 1:L) {
+		for(j in 1:npred) {
+			Dens[i, ,l , j] <- P[i, l] * dnorm(grid, Xpred[j, ] 
+					%*%Beta1[i, l, ],sqrt(Sigma2[i, l]))
+			Fdist[i, , l, j] <- P[i, l] * pnorm(grid, Xpred[j, ] 
+					%*%Beta1[i, l, ],sqrt(Sigma2[i, l]))
+		}
+	}
+	for(j in 1:ngrid) {
+		for(l in 1:npred) {
+			Densm[i, j, l] <- sum(Dens[i, j, , l])
+			Fdistm[i, j, l] <- sum(Fdist[i, j, , l])
+		}
+	}
+	}
+	return(list(P, Beta1, Sigma2, Densm, Fdistm))
+}
+
+### B-spline function
+  
+spline.est <- function(x,knots,betas){ 
+    des <- t(splineDesign(knots, x, outer.ok=FALSE, ord = 4))
+    val <- matrix(betas,1,length(betas))%*%des
+    return(val)}
+  
+  
+### Empirical risk functions
+  
+smooth.loss <- function(data, theta, knots, delta){
+	if(data[1]==(-1)){
+		loss <- min((1/delta)*max((delta-data[1]
+		*(data[2]-spline.est(data[3],knots, theta))),0),1)/p[1]
+	}else {
+		loss <- min((1/delta)*max((delta-data[1]
+		*(data[2]-spline.est(data[3],knots, theta))),0),1)/p[2]
+	}
+	return( loss)
+}
+
+emp.risk.smooth <- function(theta, data, knots, delta) 1*sum(apply(data,1,
+			smooth.loss,theta=theta, delta=delta,knots=knots))
+
+lr_func <- function(data,knots1,theta1,knots2,theta2,delta){
+    l.old = emp.risk.smooth(theta1, data, knots1, delta)
+    l.new = emp.risk.smooth(theta2, data, knots2, delta)
+    lr = exp(-(l.new-l.old))
+    return(lr)
+  }
+
+### Metropolis Hastings sampler
+  
+  mh_beta_i <- function(j, dprop, rprop, data,knots,betas,delta) {
+    beta_prop <- betas
+    u <- rprop(betas[j])
+    beta_prop[j] <- u
+    r <- log(lr_func(data,knots,betas,knots,beta_prop,delta)) 
+	+ log(dprop(beta_prop[j] , u)) - log(dprop(u, beta_prop[j]))
+    R <- min(exp(r), 1)
+    if(runif(1) <= R) {
+      betas <- beta_prop
+    } 
+    return(betas[j])
+  }
+  
+  dprop <- function(x,theta){
+    return(dnorm(x, mean = theta,sd = 10))
+  }
+  
+  rprop <- function(theta){
+    return(rnorm(1,mean = theta, sd = 10))
+  }
+
+n.MCMC <- 4000
+n.burn <- 1000
+data<-read.table('E:\\Research\\Youden_Index\\Carvalho_biometrics_code.txt', head = TRUE, sep = '')
+z<-data$age
+x.y<-cbind(2*data$gold-1, data$fingerstick)
+data<-cbind(x.y,z)
+p = c(sum(data[,1]==-1)/nrow(data), sum(data[,1]==1)/nrow(data))
+rx = n.MCMC + n.burn
+delta<-0.05
+betas_results = matrix(0,rx,4)    
+J = 8# number of knots
+knots = c(-20,-10,0,20,89,110,120,130)
+betas = rep(90,J-4) 
+for(kx in 1:rx){
+	betas.new <- betas
+  	for(i in 1:(J-4)){
+    		betas.new[i] <- mh_beta_i( i, dprop, rprop,  data,knots,betas,
+				delta)
+  	}
+  	betas <- betas.new
+  	betas_results[kx,] <- betas
+	if(kx%%100==0) print(kx)
+}
+
+z.seq <- seq(25, 80, length.out = 101)
+#z.seq <- seq(from =32, to = 76, length.out=101)
+eff.vals <- matrix(NA,101,n.MCMC)
+for(j in (n.burn+1):(n.burn+n.MCMC)){
+	eff.vals[,j-1000] <- t(spline.est(z.seq, knots, betas_results[j,]))
+}
+post.mean <- rowMeans(eff.vals)
+post.quant <- function(p) apply(eff.vals,1,quantile,probs=p)
+post.quant(.5)
+
+## GLM
+
+data.d <- cbind(data, rep(NA,nrow(data)))
+data.d[,4]<-(data.d[,3]^2)
+data.d[,1] <- ifelse(data[,1]==-1,0,1)
+summary(glm(data.d[,1]~data.d[,2]+data[,3]+data.d[,4], family = binomial(link = 'probit')))
+summary(glm(data.d[,1]~data.d[,2]+data[,3]+data.d[,4], family = binomial(link = 'logit')))
+summary(glm(data.d[,1]~data.d[,2]+data[,3], family = binomial(link = 'probit')))
+summary(glm(data.d[,1]~data.d[,2]+data[,3], family = binomial(link = 'probit')))
+p.func <- function(dd){
+	p<-exp(-14.315965 + 0.034761*dd[2]+0.359037*dd[3]-0.003421*dd[3]^2)
+	return(p/(p+1))
+} 
+
+p.func <- function(dd){
+	p<-exp(-14.315965 + 0.034761*dd[2]+0.359037*dd[3]-0.003421*dd[3]^2)
+	return(p/(p+1))
+} 
+
+### de Carvalho et al. (2017) method
+diabetes <- data
+ind0 <- which(diabetes[, 1] == -1)
+ind1 <- which(diabetes[, 1] == 1)
+n0 <- length(ind0)
+n1 <- length(ind1)
+y0 <- diabetes[ind0, 2]
+y1 <- diabetes[ind1, 2]
+x0 <- diabetes[ind0, 3]
+x1 <- diabetes[ind1, 3]
+var0 <- var1 <- 1
+knots0 <- c()
+knots1 <- c()
+nk <- length(knots0)
+res0np <- bsplinesddp(y = y0, x = x0, grid = seq(50, 500, len = 200),
+xpred = seq(25, 80, by = 3), m = rep(0, nk + 4),
+S = 100 * diag(nk + 4), nu = nk + 6,
+psi = diag(nk + 4), atau = 0.1, btau = 0.1, alpha = 1,
+L = 20, nsim = 5000, knots = knots0)
+res1np <- bsplinesddp(y = y1, x = x1, grid = seq(50, 500, len = 200),
+xpred = seq(25, 80, by = 3), m = rep(0, nk + 4),
+S = 100 * diag(nk + 4), nu = nk + 6,
+psi = diag(nk + 4), atau = 0.1, btau = 0.1, alpha = 1,
+L = 20, nsim = 5000, knots = knots1)
+grid <- seq(50, 500, len = 200)
+xpred <- seq(25, 80, by = 3)
+ngrid <- length(grid)
+npred <- length(xpred)
+nsim <- 5000
+nburn <- 1500
+difcnp <- array(0, c(nsim - nburn, ngrid, npred))
+for(k in 1:npred)
+for(j in 1:ngrid)
+difcnp[, j, k] <- res0np[[5]][(nburn + 1):nsim, j, k] -
+res1np[[5]][(nburn + 1):nsim, j, k]
+coptcnp <- matrix(0, nrow = nsim - nburn, ncol = npred)
+for(k in 1:npred)
+for(j in 1:(nsim - nburn))
+coptcnp[j, k] = mean(grid[which(difcnp[j, , k] == max(difcnp[j, , k]))])
+coptcrnp <- matrix(nrow = npred, ncol = 3)
+for(j in 1:npred) {
+coptcrnp[j, 1] <- quantile(coptcnp[, j], 0.025)
+coptcrnp[j, 2] <- mean(coptcnp[, j])
+coptcrnp[j, 3] <- quantile(coptcnp[, j], 0.975)
+}
+yicnp <- matrix(0, nrow = nsim - nburn, ncol = npred)
+for(k in 1:npred){
+for(j in 1:(nsim - nburn)){
+yicnp[j,k] <- max(difcnp[j, , k])
+}}
+yicrnp <- matrix(nrow = npred,ncol = 3)
+for(j in 1:npred) {
+yicrnp[j, 1] <- quantile(yicnp[, j], 0.025)
+yicrnp[j, 2] <- mean(yicnp[, j])
+yicrnp[j, 3] <- quantile(yicnp[, j], 0.975)
+}
+
+
+### Figure 5
+par(mfrow = c(1, 2))
+plot(z.seq, post.mean, col = 'white', xlim = c(25,80),ylim = c(50,340), 
+	ylab = expression(theta(age)), xlab = "age")
+lines(xpred, coptcrnp[, 2], lty=2, lwd=2)
+polygon(x = c(rev(z.seq), z.seq), y = c(rev(post.quant(0.05)), post.quant(0.95)),
+border = NA, col = "lightgray")
+lines(z.seq,post.quant(0.05))
+lines(z.seq,post.quant(0.95))
+points(data[,3], data[,2],pch = (2+data[,1]))
+lines(z.seq,post.mean, lwd=2)
+lines(x = c(27,28), y = c(150,150))
+lines(x = c(27,28), y = c(320,320))
+lines(x = c(27,27), y = c(150,320))
+lines(x = c(28,28), y = c(150,320))
+
+
+
+plot(xpred, coptcrnp[, 2], type = "l", xlim = c(25,80), ylim = c(50, 340),
+xlab = "age", ylab = expression(theta(age)), lwd = 2)
+lines(z.seq, post.mean, lty=2, lwd = 2)
+polygon(x = c(rev(xpred), xpred), y = c(rev(coptcrnp[, 1]), coptcrnp[, 3]),
+border = NA, col = "lightgray")
+lines(xpred, coptcrnp[, 1])
+lines(xpred, coptcrnp[, 2], lwd = 2)
+points(data[,3], data[,2],pch = (2+data[,1]))
+lines(xpred, coptcrnp[, 3])
+
+library(plotrix)
+draw.ellipse(27.5, 160, a = 1, b = 20)
+
+
+
+
+
+
